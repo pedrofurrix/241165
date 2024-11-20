@@ -1,0 +1,10 @@
+# Ignore C source files
+*.c
+
+# Ignore DLL files
+*.dll
+
+# Ignore object files
+*.o
+
+__pycache__/
