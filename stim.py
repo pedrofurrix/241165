@@ -180,3 +180,5 @@ def ampmodulation_wiki(ton,amp,depth,dt,dur,simtime,freq,modfreq):
 # h.xvalue("Duration (ms)", "DUR", 1, "setstim(DEL,DUR,AMP)", 0, 1)
 # h.xvalue("Amplitude (uA or V/m)", "AMP", 1, "setstim(DEL,DUR,AMP)", 0, 1)
 # h.xpanel(535,652)
+
+print(np.linspace(0,100,11))

@@ -21,13 +21,13 @@ depth=1
 dt=h.dt
 dur=250
 simtime=h.tstop
-freq=1000
+freq=100
 modfreq=10
 t,stim1=stim.ampmodulation_wiki(ton,amp,depth,dt,dur,simtime,freq,modfreq)
 
 
 
-h.createPanels()
+h.createPanels() #SetParams
 
 
 

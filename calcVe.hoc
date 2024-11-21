@@ -66,7 +66,7 @@ proc calcesE() { local theta,phi
 	phi = phi*PI/180
 	Ex = sin(theta)*cos(phi)
 	Ey = sin(theta)*sin(phi)
-	Ez = cos(theta)
+	Ez = cos(theta) 
 	forall {
 		if (ismembrane("xtra")) {
 			for(x,0){
