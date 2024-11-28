@@ -8,6 +8,7 @@
 DEL = 1  // ms - delay to first phase
 DUR = 1 // ms - duration of first phase
 AMP = -10  // µA (stim_mode = 1) or V/m (stim_mode = 2) - amplitude of first phase
+
 objref stim_amp, stim_time
 stim_amp = new Vector()
 stim_time = new Vector()

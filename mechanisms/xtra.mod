@@ -3,10 +3,10 @@
 
 NEURON {
 	SUFFIX xtra
-	RANGE es : (es = max amplitude of the potential)		
+	RANGE es, er : (es = max amplitude of the potential)		
 	RANGE x, y, z, type, order
 	GLOBAL stim : (stim = normalized waveform)
-	POINTER ex 
+	POINTER im, ex 
 }
 
 PARAMETER {	
@@ -21,16 +21,21 @@ PARAMETER {
 ASSIGNED {
 	v (millivolts)
 	ex (millivolts)
+	er (microvolts)
+	im (milliamp/cm2)
 	stim (unitless) 		
 	area (micron2)
 }
 
 INITIAL {
-	ex = stim*es	
+	ex = stim*es : I can say that es is Ohm, if im and stim were in mAmp 
+	er= es*im*area*0.00001 : er (Volts) =es (Ohms) *im*10**-3*10**-8 (Amp/um^2) *area
 }
 
 
 BEFORE BREAKPOINT { : before each cy' = f(y,t) setup
   ex = stim*es
 }
-
+AFTER SOLVE { : after each solution step
+  er= es*im*area*0.00001
+}

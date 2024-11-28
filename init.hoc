@@ -8,7 +8,8 @@
 {load_file("interpCoordinates.hoc")}
 {load_file("setPointers.hoc")}
 {load_file("calcVe.hoc")}
-{load_file("stimWaveform.hoc")}
+//{load_file("stimWaveform.hoc")}
+{load_file("stim.hoc")}
 {load_file("cellChooser.hoc")}
 {load_file("setParams.hoc")}
 {load_file("editMorphology.hoc")} // procs for editing cell morphology

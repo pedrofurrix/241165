@@ -1,0 +1,25 @@
+// $Id: field.hoc,v 1.2 2005/09/10 23:02:15 ted Exp $
+
+vrec = 0  // extracellularly recorded potential
+
+func fieldrec() { local sum
+	sum = 0
+	forall {
+	  if (ismembrane("xtra")) {
+// avoid nodes at 0 and 1 ends, which shouldn't make any contribution
+		for (x,0) sum += er_xtra(x)
+	  }
+	}
+	return sum
+}
+
+proc init() {
+        finitialize(v_init)
+        fcurrent()
+	vrec = fieldrec()
+}
+
+proc advance() {
+        fadvance()
+	vrec = fieldrec()
+}

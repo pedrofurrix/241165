@@ -10,6 +10,7 @@ proc setpointers() { local done
     if (ismembrane("xtra") && ismembrane("extracellular")) {
 		for (x, 0) {		
 			setpointer ex_xtra(x), e_extracellular(x)
+      setpointer im_xtra(x), i_membrane(x)
 		}
     }
   }
