@@ -36,21 +36,21 @@ def cmax_shift(bot_dir,top_dir, cell=None):
     headers=voltages.drop(columns=["t"]).columns.tolist()
     simparams, stimparams=load_params(bot_dir)
 
-
     num_seg=len(voltages.iloc[0,1:]) #remove column that has the time
+    v_init=voltages.iloc[0,1:].to_list()
 
     if cell:
         # Initialize variables for tracking max/min values and corresponding segments
         max_shift=[0 for sec in cell.all for seg in sec] #alternatively, h.allsec() #Change also when obtaining the values...
-        max_v=[simparams["v_init"] for sec in cell.all for seg in sec]
-        min_v=[simparams["v_init"] for sec in cell.all for seg in sec]
+        max_v=[v_init[seg] for seg in range(num_seg)]
+        min_v=[v_init[seg] for seg in range(num_seg)]
         seg=[seg for sec in cell.all for seg in sec]
         pshift=[0 for sec in cell.all for seg in sec]
         nshift=[0 for sec in cell.all for seg in sec]
     else:
         max_shift=[0 for seg in range(num_seg)] #alternatively, h.allsec() #Change also when obtaining the values...
-        max_v=[simparams["v_init"] for seg in range(num_seg)]
-        min_v=[simparams["v_init"] for seg in range(num_seg)]
+        max_v=[v_init[seg] for seg in range(num_seg)]
+        min_v=[v_init[seg] for seg in range(num_seg)]
         seg=[seg for seg in range(num_seg)]
         pshift=[0 for seg in range(num_seg)]
         nshift=[0 for seg in range(num_seg)]
@@ -87,8 +87,8 @@ def cmax_shift(bot_dir,top_dir, cell=None):
     
     
     for i in range(len(max_shift)):
-        pshift[i]=max_v[i]-v_init
-        nshift[i]=min_v[i]-v_init
+        pshift[i]=max_v[i]-v_init[i]
+        nshift[i]=min_v[i]-v_init[i]
         if abs(pshift)>= abs(nshift):
             max_shift[i]=pshift
         else:

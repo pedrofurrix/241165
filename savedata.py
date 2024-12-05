@@ -6,20 +6,26 @@ from neuron import h
 import json
 
 
-def savedata(bot_dir,id,t,soma_v,dend_v,v_extracellular,is_xtra,vrec):
-    filename=f"run{id}.csv"
+def savedata(bot_dir,t,is_xtra,vrec):
+    filename=f"vrec.csv"
     path=os.path.join(bot_dir,filename)
-    data=pd.DataFrame({"t":t,"soma_v":soma_v,"dend_v":dend_v,"v_extracellular":v_extracellular,"is_xtra":is_xtra,"vrec":vrec})
+    data=pd.DataFrame({"t": t,"is_xtra": is_xtra,"vrec": vrec})
     data.to_csv(path,index=False)
 
 def saveparams(run_id,simparams,stimparams):
     #Create folder for run
     current_directory = os.getcwd()
     print(current_directory)
-    folder_name=f"data\\{simparams[2]}\\{stimparams[4]}Hz"
-    top_dir = os.path.join(current_directory, folder_name)
+    folder_name=f"data\\{simparams[2]}"
+    top_top_dir = os.path.join(current_directory, folder_name)
+
+    if not os.path.exists(top_top_dir):
+        os.makedirs(top_top_dir)
+    
+    top_dir = os.path.join(top_top_dir, f"{stimparams[3]}Hz")
     if not os.path.exists(top_dir):
         os.makedirs(top_dir)
+        
     bot_dir = os.path.join(top_dir,f"{stimparams[0]}Vm")
     if not os.path.exists(bot_dir):
         os.makedirs(bot_dir)
@@ -32,7 +38,7 @@ def saveparams(run_id,simparams,stimparams):
             "run_id": run_id,
             "cell_id" : simparams[2], # cell_id is in HOC
             "cell_name" : simparams[3], # cell_name
-            "temperature" : h.celsius(),
+            "temperature" : h.celsius,
             "dt": simparams[0],  # in ms
             "simtime": simparams[1],  # in ms
             "v_init": h.v_init  # in ms
@@ -54,9 +60,9 @@ def saveparams(run_id,simparams,stimparams):
     print(f"Parameters saved to {path}")
     return top_dir,bot_dir
 
-def savelocations_xtra(top_dir,cell):
+def savelocations_xtra(top_top_dir,cell):
     locations="locations_xtra.csv"
-    path=os.path.join(top_dir,locations)
+    path=os.path.join(top_top_dir,locations)
     with open(path, "w") as file:
         writer = csv.writer(file)
         header = ["seg", "x_xtra", "y_xtra", "z_xtra"]  # Column names as a list #[f"{sec.name()}({i})" for sec in cell.all for i, _ in enumerate(sec)]
@@ -127,8 +133,8 @@ def savespikes(bot_dir,spiketimes):
     data=pd.DataFrame(spike_dict)
     data.to_csv(path,index=False)
     
-def save_locations(top_dir,cell):
-    path=os.path.join(top_dir,f"run_locations.csv")
+def save_locations(top_top_dir,cell):
+    path=os.path.join(top_top_dir,f"run_locations.csv")
     with open(path,'w',newline='') as file:
         writer = csv.writer(file)
         header =["seg","x","y","z","arc","diam"] #[f"{sec.name()}({i})" for sec in cell.all for i, _ in enumerate(sec)]

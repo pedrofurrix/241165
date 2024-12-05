@@ -136,7 +136,10 @@ def ampmodulation(ton,amp,depth,dt,dur,simtime,freq,modfreq):
   times=np.arange(0,simtime+dt,dt)
   # 1000 is a factor because dt is in ms and freq in Hz
   #added -ton so that it starts at 0
-  mod=1/2*(np.sin(2*np.pi*modfreq/1000*(times-ton-1/(4*modfreq/1000)))+1)*depth+(1-depth)
+  if modfreq!=0:
+    mod=1/2*(np.sin(2*np.pi*modfreq/1000*(times-ton-1/(4*modfreq/1000)))+1)*depth+(1-depth)
+  else:
+    mod=1
   stim=amp*mod*np.sin(2*np.pi*freq/1000*(times-ton))
   #Making it so that while time<ton and time>ton+dur, stim value=0
   stim[times < ton] = 0
