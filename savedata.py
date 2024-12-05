@@ -1,47 +1,106 @@
 import pandas as pd
 import os
 import matplotlib.pyplot as plt
-
+import csv 
 from neuron import h
+import json
 
 
-def savedata(folder,id,t,soma_v,dend_v,axon_v,v_extracellular,is_xtra,vrec):
+def savedata(bot_dir,id,t,soma_v,dend_v,v_extracellular,is_xtra,vrec):
     filename=f"run{id}.csv"
-    path=os.path.join(folder,filename)
-    data=pd.DataFrame({"t":t,"soma_v":soma_v,"dend_v":dend_v, "axon_v":axon_v, "v_extracellular":v_extracellular,"is_xtra":is_xtra,"vrec":vrec})
+    path=os.path.join(bot_dir,filename)
+    data=pd.DataFrame({"t":t,"soma_v":soma_v,"dend_v":dend_v,"v_extracellular":v_extracellular,"is_xtra":is_xtra,"vrec":vrec})
     data.to_csv(path,index=False)
 
-def saveparams(id,cell,simparams,stimparams):
+def saveparams(run_id,simparams,stimparams):
     #Create folder for run
     current_directory = os.getcwd()
     print(current_directory)
-    folder_name=f"./data/run{id}"
-    folder = os.path.join(current_directory, folder_name)
-    if not os.path.exists(folder):
-        os.makedirs(folder)
+    folder_name=f"data\\{simparams[2]}\\{stimparams[4]}Hz"
+    top_dir = os.path.join(current_directory, folder_name)
+    if not os.path.exists(top_dir):
+        os.makedirs(top_dir)
+    bot_dir = os.path.join(top_dir,f"{stimparams[0]}Vm")
+    if not os.path.exists(bot_dir):
+        os.makedirs(bot_dir)
 
-    filename=f"params{id}.txt"
-    path=os.path.join(folder,filename)
+
+    filename="params.json"
+    path=os.path.join(bot_dir,filename)
+    params = {   
+        "Simulation Parameters": {
+            "run_id": run_id,
+            "cell_id" : simparams[2], # cell_id is in HOC
+            "cell_name" : simparams[3], # cell_name
+            "temperature" : h.celsius(),
+            "dt": simparams[0],  # in ms
+            "simtime": simparams[1],  # in ms
+            "v_init": h.v_init  # in ms
+        },
+        "Stimulation Parameters": {
+            "E": stimparams[0],  # Electric field in V/m
+            "Theta" : stimparams[6],
+            "Phi" : stimparams[7],
+            "Delay": stimparams[1],  # Delay in ms
+            "Duration": stimparams[2],  # Duration in ms
+            "Carrier Frequency": stimparams[3],  # Frequency in Hz
+            "Modulation Depth": stimparams[4],  # Depth (0-1)
+            "Modulation Frequency": stimparams[5]  # Modulation frequency in Hz
+        }
+    }
     with open(path, "w") as file:
-    # Write the header
-        file.write("Simulation Parameters\n")
-        file.write(f"dt={simparams[0]} ms\n simtime={simparams[1]} ms\n temperature={simparams[2]}ºC")
-        file.write("Stimulation Parameters\n")
-        file.write(f"E={stimparams[0]}V/m\n Delay={stimparams[1]} ms\n Amplitude={stimparams[2]} multiplier\n")
-        file.write(f"Duration={stimparams[3]} ms\n Carrier Frequency={stimparams[4]} Hz\n Modulation Depth={stimparams[5]}\n Modulation Frequency={stimparams[6]} Hz\n  \n")    
-        file.write("x   y   z (um)   es (mV)\n")
+        json.dump(params, file, indent=4)  # Use indent=4 for readability
+
+    print(f"Parameters saved to {path}")
+    return top_dir,bot_dir
+
+def savelocations_xtra(top_dir,cell):
+    locations="locations_xtra.csv"
+    path=os.path.join(top_dir,locations)
+    with open(path, "w") as file:
+        writer = csv.writer(file)
+        header = ["seg", "x_xtra", "y_xtra", "z_xtra"]  # Column names as a list #[f"{sec.name()}({i})" for sec in cell.all for i, _ in enumerate(sec)]
+        writer.writerow(header)
         for sec in cell.all:
             if h.ismembrane("xtra"):
                 for seg in sec:
+                    segname=seg
                     x = seg.x_xtra
                     y = seg.y_xtra
                     z = seg.z_xtra
-                    es = seg.es_xtra
                     # Write the values to the file
-                    file.write(f"{x} {y} {z} {es}\n")
-    return folder 
+                    writer.writerow([segname,x,y,z])
+    return print(f"Saved to {path}")
 
-def saveplot(folder,title,fig_or_ax):
+def save_es(top_dir,Evalue,cell):
+    """
+    Save 'es' values to a CSV file, appending a new column for each run.
+
+    Parameters:
+    - es: List of es values.
+    - top_dir
+    - Evalue associated with the files...
+    """
+    # Convert 'es' to a pandas DataFrame
+    es_values=[seg.es_xtra for sec in cell.all for seg in sec]
+    out_file=os.path.join(top_dir,"es_values.csv")
+
+    if os.path.exists(out_file):
+        # File exists, load existing data
+        existing_data = pd.read_csv(out_file)
+        # Append the new column
+        es_run = pd.DataFrame({f"Run_{Evalue}": es_values})
+        existing_data[f"Run_{Evalue}"] = es_run[f"Run_{Evalue}"]
+    else:
+        # File does not exist, initialize with the new data
+        seg=[seg for sec in cell.all for seg in sec]
+        es_init = pd.DataFrame({"seg_info":seg , f"Run_{Evalue}": es_values})
+        existing_data = es_init
+
+    existing_data.to_csv(out_file, index=False)
+    print(f"'es' values saved to {out_file} for Run {Evalue}.")
+
+def saveplot(bot_dir,title,fig_or_ax):
     filename=f"{title}.png"
 
     if isinstance(fig_or_ax, plt.Axes):
@@ -53,19 +112,34 @@ def saveplot(folder,title,fig_or_ax):
     else:
         raise TypeError("Input must be a matplotlib Figure or Axes object.")
     
-    path=os.path.join(folder,filename)
+    path=os.path.join(bot_dir,filename)
     
     fig.savefig(path)
+    print(f"Successfully saved as {filename}")
 
-
-def savespikes(folder,id,spiketimes):
-    filename=f"spikes{id}.csv"
-    path=os.path.join(folder,filename)
+def savespikes(bot_dir,spiketimes):
+    filename=f"spikes.csv"
+    path=os.path.join(bot_dir,filename)
     
     spike_dict = {}
     for i, spikes in enumerate(spiketimes):
         spike_dict[f"{i}"]= spikes
-    
     data=pd.DataFrame(spike_dict)
     data.to_csv(path,index=False)
-
+    
+def save_locations(top_dir,cell):
+    path=os.path.join(top_dir,f"run_locations.csv")
+    with open(path,'w',newline='') as file:
+        writer = csv.writer(file)
+        header =["seg","x","y","z","arc","diam"] #[f"{sec.name()}({i})" for sec in cell.all for i, _ in enumerate(sec)]
+        writer.writerow(header)
+        for sec in cell.all:
+            for i in range(sec.n3d()):
+                section_info=f"{sec.name()}({i})"
+                x=sec.x3d(i)
+                y=sec.y3d(i)
+                z=sec.z3d(i)
+                arc=sec.arc3d(i)
+                diam=sec.diam3d(i)
+                location=[section_info,x,y,z,arc,diam]
+                writer.writerow(location)
