@@ -89,10 +89,10 @@ def cmax_shift(bot_dir,top_dir, cell=None):
     for i in range(len(max_shift)):
         pshift[i]=max_v[i]-v_init[i]
         nshift[i]=min_v[i]-v_init[i]
-        if abs(pshift)>= abs(nshift):
-            max_shift[i]=pshift
+        if abs(pshift[i])>= abs(nshift[i]):
+            max_shift[i]=pshift[i]
         else:
-            max_shift[i]=nshift
+            max_shift[i]=nshift[i]
 
               #This has to change if they have different values...
     # In case they are different, h.v_init can be replaced by voltages.iloc[0,i] - initial voltage...
@@ -192,7 +192,7 @@ def plot_voltage(bot_dir,results):
     ax2.legend()
     ax2.set_title(title2)  # Optional: add title to the plot
     # plt.show()
-
+    
     # Plot Max both
     fig3,ax3=plt.subplots()
     title3=("Membrane potential over time - Maxshift")
@@ -217,7 +217,8 @@ def plot_voltage(bot_dir,results):
         
         path=os.path.join(bot_dir,filename)
         
-        fig.savefig(path)
+        fig.savefig(path, dpi=300, bbox_inches='tight')
+
         print(f"Successfully saved as {filename}")
 
     saveplot(bot_dir,title1,fig)
@@ -227,21 +228,10 @@ def plot_voltage(bot_dir,results):
 def get_folder(CF,E,cell_id):
     currdir=os.getcwd()
     top_dir=os.path.join(currdir,f"data\\{cell_id}\\{CF}Hz")
-    bot_dir=os.path.join(bot_dir,f"{E}Vm")
+    bot_dir=os.path.join(top_dir,f"{E}Vm")
     print(currdir)
     print(top_dir)
     print(bot_dir)
     
     return top_dir, bot_dir
 
-
-
-# folder=get_folder(0)
-
-
-# max_shift, max_v, min_v, results=cmax_shift(folder)
-# plot_voltage(folder,results)
-# print(results)
-# print(max_shift)
-# print(max_v)
-# print(min_v)

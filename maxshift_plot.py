@@ -26,7 +26,7 @@ def plot_maxshift(bot_dir,filename="max_shift",cell=None,max_shift=None):
 
     if not max_shift:
         max_shift_data= load_results(bot_dir)
-        max_v=max_shift_data[filename].to_list()
+        max_shift=max_shift_data[filename].to_list()
 
         
     i=0

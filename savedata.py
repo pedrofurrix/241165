@@ -11,6 +11,7 @@ def savedata(bot_dir,t,is_xtra,vrec):
     path=os.path.join(bot_dir,filename)
     data=pd.DataFrame({"t": t,"is_xtra": is_xtra,"vrec": vrec})
     data.to_csv(path,index=False)
+    print(f"Vrec and is saved to {path}")
 
 def saveparams(run_id,simparams,stimparams):
     #Create folder for run
@@ -88,7 +89,7 @@ def save_es(top_dir,Evalue,cell):
     - Evalue associated with the files...
     """
     # Convert 'es' to a pandas DataFrame
-    es_values=[seg.es_xtra for sec in cell.all for seg in sec]
+    es_values=[seg.es_xtra*Evalue for sec in cell.all for seg in sec]
     out_file=os.path.join(top_dir,"es_values.csv")
 
     if os.path.exists(out_file):
@@ -104,7 +105,7 @@ def save_es(top_dir,Evalue,cell):
         existing_data = es_init
 
     existing_data.to_csv(out_file, index=False)
-    print(f"'es' values saved to {out_file} for Run {Evalue}.")
+    print(f"'es*V' values saved to {out_file} for Run {Evalue}.")
 
 def saveplot(bot_dir,title,fig_or_ax):
     filename=f"{title}.png"
@@ -120,7 +121,7 @@ def saveplot(bot_dir,title,fig_or_ax):
     
     path=os.path.join(bot_dir,filename)
     
-    fig.savefig(path)
+    fig.savefig(path, dpi=300, bbox_inches='tight')
     print(f"Successfully saved as {filename}")
 
 def savespikes(bot_dir,spiketimes):

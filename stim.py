@@ -148,6 +148,7 @@ def ampmodulation(ton,amp,depth,dt,dur,simtime,freq,modfreq):
   t=h.Vector(times)
   stim1=h.Vector(stim)
   stim1.play(h._ref_stim_xtra,t,0)
+
   return t,stim1
 
 #amp in mA, dt,dur and simtime in ms, freq in Hz
@@ -184,4 +185,4 @@ def ampmodulation_wiki(ton,amp,depth,dt,dur,simtime,freq,modfreq):
 # h.xvalue("Amplitude (uA or V/m)", "AMP", 1, "setstim(DEL,DUR,AMP)", 0, 1)
 # h.xpanel(535,652)
 
-print(np.linspace(0,100,11))
+# print(np.linspace(0,100,11))
