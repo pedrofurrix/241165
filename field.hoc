@@ -13,13 +13,13 @@ func fieldrec() { local sum
 	return sum
 }
 
-/*
+
 proc init() {
         finitialize(v_init)
         fcurrent()
 	vrec = fieldrec()
 }
-*/
+
 proc advance() {
         fadvance()
 	vrec = fieldrec()

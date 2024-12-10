@@ -120,7 +120,7 @@ def saveplot(bot_dir,title,fig_or_ax):
         raise TypeError("Input must be a matplotlib Figure or Axes object.")
     
     path=os.path.join(bot_dir,filename)
-    
+
     fig.savefig(path, dpi=300, bbox_inches='tight')
     print(f"Successfully saved as {filename}")
 

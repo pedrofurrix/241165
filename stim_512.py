@@ -46,6 +46,7 @@ axon_v=h.Vector().record(cell.axon[0](0.5)._ref_v)
 vrec = h.Vector().record(h._ref_vrec)  # records vrec at each timestep
 
 # #Restore steady state
+# h.finitialize(-73*mV)
 # path=os.path.join(currdir,f"data\\{id}\\steady_state\\steady_state.dat")
 # savestate=h.SaveState()
 # h_file = h.File(path)
@@ -83,16 +84,23 @@ h.dt=dt
 h.tstop=simtime
 h.celsius=37
 
-#Record voltages
-import all_voltages
-file,callback=all_voltages.record_voltages(cell,e_dir)
+# #Record voltages
+# import all_voltages
+# file,callback=all_voltages.record_voltages(cell,e_dir)
+
+import record_voltages_gpt
+file,callback=record_voltages_gpt.record_voltages_hdf5(cell,e_dir)
+# save_data, callback=record_voltages_gpt.record_voltages_numpy(cell,e_dir)
+
 
 h.finitialize(-73*mV)
+h.frecord_init()	
 h.continuerun(simtime)
 
 
 print("Simulation Finished")
 file.close()
+# save_data()
 
 from savedata import savedata,saveplot
 
@@ -109,7 +117,7 @@ savedata(e_dir,t,is_xtra,vrec)
 
 
 #Save plots
-fig,ax=plt.subplots()
+fig1,ax=plt.subplots()
 ax.plot(t,soma_v,label="soma")
 ax.plot(t,dend_v,label="dend")
 ax.plot(t,axon_v,label="axon")
@@ -117,23 +125,26 @@ ax.set_xlabel("time(ms)")
 ax.set_ylabel("Membrane Voltage (mV)") #vint-vext~
 ax.legend()
 title1="Membrane Potential"
-saveplot(e_dir,title1,fig)
+ax.set_title(title1)
+saveplot(e_dir,title1,fig1)
 
-fig,ax=plt.subplots()
+fig2,ax=plt.subplots()
 ax.plot(t,is_xtra)
 ax.set_xlabel("time(ms)")
 ax.set_ylabel("IS_xtra")
-title1="Stimulation"
+title2="Stimulation"
+ax.set_title(title2)
 plt.show()
-saveplot(e_dir,title1,fig)
+saveplot(e_dir,title2,fig2)
 
-fig,ax=plt.subplots()
+fig3,ax=plt.subplots()
 ax.plot(t,vrec)
 ax.set_xlabel("time(ms)")
 ax.set_ylabel("vrec(uV)")
-title1="Recorded Potential"
+title3="Recorded Potential"
+ax.set_title(title3)
 plt.show()
-saveplot(e_dir,title1,fig)
+saveplot(e_dir,title3,fig3)
 
 
 

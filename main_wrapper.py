@@ -1,6 +1,10 @@
-from init_stim import run_simulation,save_plots
 import os
-print(os.getcwd())
+# Get the directory of the current script
+script_dir = os.path.dirname(os.path.abspath(__file__))
+# Change the working directory to the script's directory
+os.chdir(script_dir)
+
+from init_stim import run_simulation,save_plots
 
 cell_id=1
 theta = 180
@@ -17,5 +21,4 @@ run_id = 0
 
 e_dir,t, is_xtra,vrec,soma_v,dend_v,axon_v,cell=run_simulation(cell_id, theta, phi, simtime, dt, amp, depth, freq, modfreq,ton,dur,run_id)
 
-
-# save_plots(e_dir,t,is_xtra,vrec,soma_v,dend_v,axon_v)
+save_plots(e_dir,t,is_xtra,vrec,soma_v,dend_v,axon_v)

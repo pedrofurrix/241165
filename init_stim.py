@@ -7,6 +7,7 @@ import pandas as pd
 import stim
 from savedata import saveparams, save_es, savedata, saveplot
 import all_voltages
+import record_voltages_gpt
 
 # import load_files
 h.load_file("interpCoordinates.hoc")
@@ -22,7 +23,6 @@ h.load_file("field.hoc")
 #Initializes the cell
 def initialize_cell(cell_id,theta,phi):
     
-
     h.setParamsAdultHuman()
     h.myelinate_ax=1
     h.cell_chooser(cell_id)
@@ -42,26 +42,39 @@ def initialize_cell(cell_id,theta,phi):
 # Restore Steady State
 def restore_steady_state(cell_id):
     currdir=os.getcwd()
-    print(currdir)
-    path = os.path.join(currdir, f"data\\{cell_id}\\steady_state\\steady_state.dat")
+    path = os.path.join(currdir, f"data\\{cell_id}\\steady_state\\steady_state.bin")
     savestate = h.SaveState()
-    print("1")
     h_file = h.File(path)
-    print(f"{path}")
     savestate.fread(h_file)
-    print("3")
     savestate.restore(1)
-    print("4")
+    h.fcurrent()  # Synchronize restored state
+    h.t = 0               # Reset simulation time to 0
+    h.tstop = 0.1         # Run a very brief simulation
+    h.continuerun(h.tstop)  # Allow NEURON to stabilize
     h.t = 0
     print(f"Steady state restored from {path}, and time reset to {h.t} ms")
 
+def setstim(simtime,dt,ton,amp,depth,dur,freq,modfreq):
+    time,stim1=stim.ampmodulation(ton,amp,depth,dt,dur,simtime,freq,modfreq)
+    return time,stim1
 
 def run_simulation(cell_id, theta, phi, simtime, dt, amp, depth, freq, modfreq,ton,dur,run_id):
     cell, cell_name = initialize_cell(cell_id, theta, phi)
+    time,stim1= setstim(simtime,dt,ton,amp,depth,dur,freq,modfreq)
+
+    # Setup Recording Variables to watch over the simulation.
+    t=h.Vector().record(h._ref_t)
+    is_xtra=h.Vector().record(h._ref_stim_xtra)
+    soma_v=h.Vector().record(cell.soma[0](0.5)._ref_v)
+    dend_v=h.Vector().record(cell.dend[0](0.5)._ref_v)
+    axon_v=h.Vector().record(cell.axon[0](0.5)._ref_v)
+    vrec = h.Vector().record(h._ref_vrec)  # records vrec at each timestep
+
+    h.finitialize(-72)
     restore_steady_state(cell_id)
 
-    time, stim1 = stim.ampmodulation(ton, amp, depth, dt, dur, simtime, freq, modfreq)
-    
+
+    h.frecord_init()
     h.dt = dt
     h.tstop = simtime
     h.celsius = 37
@@ -73,24 +86,14 @@ def run_simulation(cell_id, theta, phi, simtime, dt, amp, depth, freq, modfreq,t
     freq_dir, e_dir = saveparams(run_id, simparams, stimparams)
     save_es(freq_dir, amp, cell)
 
-    #Record things
-    t=h.Vector().record(h._ref_t)
-    is_xtra=h.Vector().record(h._ref_stim_xtra)
-    soma_v=h.Vector().record(cell.soma[0](0.5)._ref_v)
-    dend_v=h.Vector().record(cell.dend[0](0.5)._ref_v)
-    axon_v=h.Vector().record(cell.axon[0](0.5)._ref_v)
-    vrec = h.Vector().record(h._ref_vrec)  # records vrec at each timestep
-
-
     # Record voltages
-    file, callback = all_voltages.record_voltages(cell, e_dir)
-
+    # file, callback = all_voltages.record_voltages(cell, e_dir)
+    file,callback=record_voltages_gpt.record_voltages_hdf5(cell,e_dir)
     h.continuerun(simtime)
     file.close()
+
     print(f"Simulation Finished\n")
     print(f"Voltages saved to {file}")
-
-    print(is_xtra.to_python())
 
     savedata(e_dir, t, is_xtra, vrec)
 
@@ -109,6 +112,7 @@ def save_plots(e_dir,t,is_xtra,vrec,soma_v,dend_v,axon_v):
     ax1.set_ylabel("Membrane Voltage (mV)") #vint-vext~
     ax1.legend()
     title1="Membrane_Potential"
+    ax1.set_title(title1)
     saveplot(e_dir,title1,fig1)
 
     fig2,ax2=plt.subplots()
@@ -116,6 +120,7 @@ def save_plots(e_dir,t,is_xtra,vrec,soma_v,dend_v,axon_v):
     ax2.set_xlabel("time(ms)")
     ax2.set_ylabel("IS_xtra")
     title2="Stimulation_current"
+    ax2.set_title(title2)
     saveplot(e_dir,title2,fig2)
 
     fig3,ax3=plt.subplots()
@@ -123,4 +128,5 @@ def save_plots(e_dir,t,is_xtra,vrec,soma_v,dend_v,axon_v):
     ax3.set_xlabel("time(ms)")
     ax3.set_ylabel("vrec(uV)")
     title3="Recorded_Potential"
+    ax3.set_title(title3)
     saveplot(e_dir,title3,fig3)

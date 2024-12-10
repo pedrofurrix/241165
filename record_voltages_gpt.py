@@ -10,7 +10,7 @@ def record_voltages_hdf5(cell, e_dir):
 
     # Create datasets
     num_segments = len([seg for sec in cell.all for seg in sec])  # Total number of segments
-    max_timesteps = 100001  # Preallocate space for a large number of timesteps (adjust as needed)
+    max_timesteps = 100000 # Preallocate space for a large number of timesteps (adjust as needed)
     time_dset = file.create_dataset("time", shape=(max_timesteps,), maxshape=(None,), dtype="f")
     voltages_dset = file.create_dataset(
         "voltages",
@@ -31,7 +31,8 @@ def record_voltages_hdf5(cell, e_dir):
         # Collect current time and voltages
         if current_index[0] >= voltages_dset.shape[0]:
             # Expand datasets if needed
-            new_size = voltages_dset.shape[0] + 1000  # Expand in chunks of 1000
+            new_size = voltages_dset.shape[0] + 10  # Expand in chunks of 10 # If I want to stimulate for more time, change this...
+
             time_dset.resize((new_size,))
             voltages_dset.resize((new_size, num_segments))
 
@@ -53,7 +54,7 @@ def record_voltages_numpy(cell, e_dir):
     data = {
         "time": [],
         "voltages": [],
-        "segment_names": [f"{sec.name()}({seg.x:.2f})" for sec in cell.all for seg in sec],
+        "segment_names": [f"{seg}" for sec in cell.all for seg in sec],
     }
 
     def sum_voltages():
