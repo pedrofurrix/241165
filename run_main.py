@@ -11,14 +11,14 @@ theta = 180
 phi = 0
 simtime = 100
 dt = 0.001
-amp = 40
+amp = 1000
 depth = 1
 freq = 500
 modfreq = 100
 ton = 0
 dur = simtime
 run_id = 0
-
-e_dir,t, is_xtra,vrec,soma_v,dend_v,axon_v,cell=run_simulation(cell_id, theta, phi, simtime, dt, amp, depth, freq, modfreq,ton,dur,run_id)
+cb=True
+e_dir,t, is_xtra,vrec,soma_v,dend_v,axon_v,cell=run_simulation(cell_id, theta, phi, simtime, dt, amp, depth, freq, modfreq,ton,dur,run_id,cb)
 
 save_plots(e_dir,t,is_xtra,vrec,soma_v,dend_v,axon_v)

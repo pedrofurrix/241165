@@ -23,11 +23,11 @@ def saveparams(run_id,simparams,stimparams):
     if not os.path.exists(top_top_dir):
         os.makedirs(top_top_dir)
     
-    top_dir = os.path.join(top_top_dir, f"{stimparams[3]}Hz")
+    top_dir = os.path.join(top_top_dir, f"{int(stimparams[3])}Hz")
     if not os.path.exists(top_dir):
         os.makedirs(top_dir)
         
-    bot_dir = os.path.join(top_dir,f"{stimparams[0]}Vm")
+    bot_dir = os.path.join(top_dir,f"{int(stimparams[0])}Vm")
     if not os.path.exists(bot_dir):
         os.makedirs(bot_dir)
 
@@ -150,3 +150,33 @@ def save_locations(top_top_dir,cell):
                 diam=sec.diam3d(i)
                 location=[section_info,x,y,z,arc,diam]
                 writer.writerow(location)
+
+def savezones(top_top_dir,cell):
+    path=os.path.join(top_top_dir,f"cellzones.json")
+    somatic = [sec.name() for sec in cell.somatic]  # Convert objects to names
+    apical = [sec.name() for sec in cell.apical]    # Convert objects to names
+    basal = [sec.name() for sec in cell.basal]      # Convert objects to names
+    axonal = [sec.name() for sec in cell.axonal]    # Convert objects to names
+    myelin=[]
+    unmyelin=[]
+    nodes=[]
+    for sec in cell.all:
+        if "Myelin" in sec.name():
+            myelin.append(sec.name())
+        elif "Unmyelin" in sec.name():
+            unmyelin.append(sec.name())
+        elif "Node" in sec.name():
+            nodes.append(sec.name())
+
+    section_data = {
+    "somatic": somatic,
+    "apical": apical,
+    "axonal": axonal,
+    "basal": basal,
+    "myelin" : myelin,
+    "unmyelin": unmyelin,
+    "nodes": nodes
+    }
+    with open(path, "w") as f:
+        json.dump(section_data, f, indent=4)
+    print(f"Section data has been saved to {path}")

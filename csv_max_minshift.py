@@ -51,7 +51,7 @@ def load_params(bot_dir): #Load paramsssssssss (get them into a format where I c
     return simparams, stimparams
 
 def cmax_shift(bot_dir,top_dir, cell=None):
-    voltages=load_voltages_csv(bot_dir)
+    voltages=load_voltages_hdf5(bot_dir)
     headers=voltages.drop(columns=["t"]).columns.tolist()
     simparams, stimparams=load_params(bot_dir)
 
@@ -128,7 +128,7 @@ def cmax_shift(bot_dir,top_dir, cell=None):
     return max_shift, max_v, min_v, results
 
 def plot_voltage(bot_dir,results):
-    voltages=load_voltages_csv(bot_dir)
+    voltages=load_voltages_hdf5(bot_dir)
 
     t=voltages["t"]
 
@@ -202,6 +202,7 @@ def plot_voltage(bot_dir,results):
     saveplot(bot_dir,title1,fig)
     saveplot(bot_dir,title2,fig2)
     saveplot(bot_dir,title3,fig3)
+    plt.close()
 
 def get_folder(CF,E,cell_id):
     currdir=os.getcwd()
@@ -213,3 +214,6 @@ def get_folder(CF,E,cell_id):
     
     return top_dir, bot_dir
 
+# top_dir,bot_dir=get_folder(500,40,1)
+# voltages=load_voltages_hdf5(bot_dir)
+# print(list(voltages.columns))
