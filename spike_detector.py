@@ -76,6 +76,7 @@ def spike_detector(bot_dir,threshold=0):
     isi_total=[]
     for zone, sections in spikedata.items():
         zone_spikes = 0 
+        spike_frequency_per_zone[zone] =0
         total_spikes_per_section[zone] = {}
         isi_zone = []  # List to store ISIs for this zone
         spike_counts_zone = []  # List to store spike counts for frequency calculation
@@ -131,7 +132,10 @@ def spike_detector(bot_dir,threshold=0):
             average_isi_per_zone[zone] = 0
     
           # Calculate spike frequency for the entire zone
-        spike_frequency_per_zone[zone]/=secnum
+        if secnum!=0:
+            spike_frequency_per_zone[zone]/=secnum
+        else:
+            spike_frequency_per_zone[zone]=0
 
     # Calculate average ISI for the entire cell
     if total_spikes > 1:
@@ -148,13 +152,13 @@ def spike_detector(bot_dir,threshold=0):
     if not os.path.exists(spikefolder):
         os.makedirs(spikefolder)
 
-    if most_spikes_count>1:
-        spikes=spikedata[most_spikes_segment]
-        isi=[spikes[i+1]-spikes[i] for i in range(most_spikes_count-1)]
-        avg_isi=sum(isi)/len(isi)
-    else:
-        avg_isi=None
-        isi=None
+    # if most_spikes_count>1:
+    #     spikes=spikedata[most_spikes_segment]
+    #     isi=[spikes[i+1]-spikes[i] for i in range(most_spikes_count-1)]
+    #     avg_isi=sum(isi)/len(isi)
+    # else:
+    #     avg_isi=None
+    #     isi=None
 
 
     if any_spikes==False:

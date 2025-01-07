@@ -58,9 +58,13 @@ def setstim(simtime,dt,ton,amp,depth,dur,freq,modfreq):
     time,stim1=stim.ampmodulation(ton,amp,depth,dt,dur,simtime,freq,modfreq)
     return time,stim1
 
-def add_callback(cell,e_dir):
-    file,callback=record_voltages_gpt.record_voltages_hdf5(cell,e_dir)
-    return file, callback
+def add_callback(cell,e_dir,simtime,dt):
+    # file,callback=record_voltages_gpt.record_voltages_hdf5(cell,e_dir)
+    # file,callback=all_voltages.record_voltages(cell,e_dir)
+    # file, callback=record_voltages_gpt.record_voltages_numpy(cell,e_dir)
+    max_timesteps=int(simtime/dt)
+    file, callback, finalize=record_voltages_gpt.record_voltages_hdf5(cell,e_dir,max_timesteps,buffer_size=100000)
+    return file, callback, finalize
 
 def run_simulation(cell_id, theta, phi, simtime, dt, amp, depth, freq, modfreq,ton,dur,run_id,cb=True):
     cell, cell_name = initialize_cell(cell_id, theta, phi)
@@ -92,17 +96,18 @@ def run_simulation(cell_id, theta, phi, simtime, dt, amp, depth, freq, modfreq,t
 
     # Record voltages
     if cb:
-        file, callback = add_callback(cell,e_dir)
+        file, callback,finalize = add_callback(cell,e_dir,simtime,dt)
         print("Added Callback")
         
     print(f"Continue Run {simtime}")
     h.continuerun(simtime)
 
     if cb:
-        file.close()
+        # file.close()
+        finalize()
 
     print(f"Simulation Finished\n")
-    print(f"Voltages saved to {file}")
+    # print(f"Voltages saved to {file}")
 
     savedata(e_dir, t, is_xtra, vrec)
 

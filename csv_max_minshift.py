@@ -112,6 +112,7 @@ def cmax_shift(bot_dir,top_dir, cell=None):
         out_file=os.path.join(bot_dir,"max_shift_data.csv")
         data_pd=pd.DataFrame([data])
         data_pd.to_csv(out_file,index=False)
+        print(f"MaxShift data saved to {out_file}")
 
         top_file=os.path.join(top_dir, "results_summary.csv")
         results_df = pd.DataFrame([results])
@@ -122,7 +123,7 @@ def cmax_shift(bot_dir,top_dir, cell=None):
         else:
             # If file does not exist, write the results with the header
             results_df.to_csv(top_file, index=False, header=True)
-        
+        print(f"Results summary appended to {top_file}")
     save_max()
 
     return max_shift, max_v, min_v, results
