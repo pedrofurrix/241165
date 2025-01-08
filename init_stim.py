@@ -66,7 +66,7 @@ def add_callback(cell,e_dir,simtime,dt):
     file, callback, finalize=record_voltages_gpt.record_voltages_hdf5(cell,e_dir,max_timesteps,buffer_size=100000)
     return file, callback, finalize
 
-def run_simulation(cell_id, theta, phi, simtime, dt, amp, depth, freq, modfreq,ton,dur,run_id,cb=True):
+def run_simulation(cell_id, theta, phi, simtime, dt, amp, depth, freq, modfreq,ton,dur,run_id,cb=True,var="no_var"):
     cell, cell_name = initialize_cell(cell_id, theta, phi)
     time,stim1= setstim(simtime,dt,ton,amp,depth,dur,freq,modfreq)
 
@@ -91,7 +91,7 @@ def run_simulation(cell_id, theta, phi, simtime, dt, amp, depth, freq, modfreq,t
     simparams=[dt,simtime,cell_id,cell_name]
     stimparams=[amp,ton,dur,freq,depth,modfreq,theta,phi]
 
-    freq_dir, e_dir = saveparams(run_id, simparams, stimparams)
+    freq_dir, e_dir = saveparams(run_id, simparams, stimparams,var)
     save_es(freq_dir, amp, cell)
 
     # Record voltages

@@ -41,9 +41,9 @@ def initialize_cell(cell_id,theta,phi):
 
 
 # Restore Steady State
-def restore_steady_state(cell_id):
+def restore_steady_state(cell_id,var):
     currdir=os.getcwd()
-    path = os.path.join(currdir, f"data\\{cell_id}\\threshold\\steady_state\\steady_state.bin")
+    path = os.path.join(currdir, f"data\\{cell_id}\\{var}\\threshold\\steady_state\\steady_state.bin")
     savestate = h.SaveState()
     h_file = h.File(path)
     savestate.fread(h_file)
@@ -59,9 +59,13 @@ def setstim(simtime,dt,ton,amp,depth,dur,freq,modfreq):
     time,stim1=stim.ampmodulation(ton,amp,depth,dt,dur,simtime,freq,modfreq)
     return time,stim1
 
-def add_callback(cell,e_dir):
-    file,callback=record_voltages_gpt.record_voltages_hdf5(cell,e_dir)
+def add_callback(cell,cell_id,freq,segments,var):
+    from all_voltages import custom_threshold
+    file,callback=custom_threshold(cell,cell_id,freq,segments,var)
     return file, callback
+
+    # file,callback,finalize=record_voltages_gpt.record_voltages_hdf5(cell,e_dir)
+    # return file, callback
 
 
 def get_results(top_dir):
@@ -107,14 +111,18 @@ def initialize(cell_id, theta, phi,top_dir):
     cell, cell_name = initialize_cell(cell_id, theta, phi)
     segments,APCounters=setup_apcs(top_dir,cell)
     print(f"Initialized")
-    return APCounters,cell
+    return APCounters,cell,segments
 
 
-def threshsearch(cell_id,simtime,dt,ton,amp,depth,dur,freq,modfreq,APCounters,threshold):
+def threshsearch(cell,segments,cell_id,simtime,dt,ton,amp,depth,dur,freq,modfreq,APCounters,threshold,cb,var):
     time,stim1= setstim(simtime,dt,ton,amp,depth,dur,freq,modfreq)
     print(f"Set stim with amplitude: {amp} V/m")
     h.finitialize(-72)
-    restore_steady_state(cell_id)
+    restore_steady_state(cell_id,var)
+
+    if cb:
+        print("Adding Callback")
+        file,callback=add_callback(cell,cell_id,freq,segments,var)
 
     h.dt = dt
     h.tstop = simtime
@@ -122,22 +130,25 @@ def threshsearch(cell_id,simtime,dt,ton,amp,depth,dur,freq,modfreq,APCounters,th
 
     for apc in APCounters:
         apc.thresh=threshold
+
     h.continuerun(simtime)
 
+    if cb:
+        file.close()
 
     return any(apc.n>0 for apc in APCounters)
 
-def threshold(cell_id, theta, phi, simtime, dt, amp, depth, freq, modfreq,ton,dur,run_id,top_dir,threshold=0):
+def threshold(cell_id, theta, phi, simtime, dt, amp, depth, freq, modfreq,ton,dur,run_id,top_dir,threshold=0,cb=False,var="cfreq"):
     low=0
     high=1e6
-    APCounters, cell=initialize(cell_id, theta, phi,top_dir)
+    APCounters, cell,segments=initialize(cell_id, theta, phi,top_dir)
 
     if amp==0: amp=50
 
     while low==0 or high==1e6:
         print(f"Searching bounds: low={low}, high={high}, amp={amp}")
 
-        if threshsearch(cell_id,simtime,dt,ton,amp,depth,dur,freq,modfreq,APCounters):
+        if threshsearch(cell,segments,cell_id,simtime,dt,ton,amp,depth,dur,freq,modfreq,APCounters,threshold,cb,var):
             high = amp
             amp /= 2  # Reduce amplitude
         else:
@@ -159,7 +170,7 @@ def threshold(cell_id, theta, phi, simtime, dt, amp, depth, freq, modfreq,ton,du
         while (high - low) > epsilon:
             print(f"Binary search: low={low}, high={high}, amp={amp}")
 
-            if threshsearch(cell_id,simtime,dt,ton,amp,depth,dur,freq,modfreq,APCounters):
+            if threshsearch(cell,segments,cell_id,simtime,dt,ton,amp,depth,dur,freq,modfreq,APCounters,threshold,cb,var):
                 high = amp
             else:
                 low = amp
@@ -171,12 +182,14 @@ def threshold(cell_id, theta, phi, simtime, dt, amp, depth, freq, modfreq,ton,du
         if h.stoprun==1: 
             break
 
-        savethresh(high,freq,cell_id)
+        cb=True
+        threshsearch(cell,segments,cell_id,simtime,dt,ton,amp,depth,dur,freq,modfreq,APCounters,threshold,cb,var)
+        savethresh(high,freq,cell_id,var)
         return high
 
-def savethresh(amp,freq,cell_id):
+def savethresh(amp,freq,cell_id,var):
     currdir=os.getcwd()
-    path = os.path.join(currdir, f"data\\{cell_id}\\threshold\\thresholds.csv")
+    path = os.path.join(currdir, f"data\\{cell_id}\\{var}\\threshold\\thresholds.csv")
     file_exists = os.path.exists(path)
      # Open the file in append mode
     with open(path, mode="a", newline="") as file:

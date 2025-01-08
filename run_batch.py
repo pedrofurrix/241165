@@ -17,7 +17,7 @@ parser.add_argument("-v", "--voltage", type=float, required=True, help="Voltage 
 args = parser.parse_args()
 
 from init_stim import run_simulation,save_plots
-
+var="cfreq"
 cell_id=1
 theta = 180
 phi = 0
@@ -39,7 +39,7 @@ amp = args.voltage
 try:
     print(f"Running simulation for freq={freq}, v={amp}")   
     e_dir,t, is_xtra,vrec,soma_v,dend_v,axon_v,cell=run_simulation(
-        cell_id, theta, phi, simtime, dt, amp, depth, freq, modfreq,ton,dur,run_id,cb)
+        cell_id, theta, phi, simtime, dt, amp, depth, freq, modfreq,ton,dur,run_id,cb,var)
     save_plots(e_dir,t,is_xtra,vrec,soma_v,dend_v,axon_v)
 except Exception as e:
     print(f"Error during simulation for freq={freq}, v={amp}: {e}")

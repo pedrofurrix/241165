@@ -13,7 +13,7 @@ def savedata(bot_dir,t,is_xtra,vrec):
     data.to_csv(path,index=False)
     print(f"Vrec and is saved to {path}")
 
-def saveparams(run_id,simparams,stimparams):
+def saveparams(run_id,simparams,stimparams,var):
     #Create folder for run
     current_directory = os.getcwd()
     print(current_directory)
@@ -22,8 +22,12 @@ def saveparams(run_id,simparams,stimparams):
 
     if not os.path.exists(top_top_dir):
         os.makedirs(top_top_dir)
+
+    vari=os.path.join(top_top_dir,f"{var}")
+    if not os.path.exists(vari):
+        os.makedirs(vari)
     
-    top_dir = os.path.join(top_top_dir, f"{int(stimparams[3])}Hz")
+    top_dir = os.path.join(vari, f"{int(stimparams[3])}Hz")
     if not os.path.exists(top_dir):
         os.makedirs(top_dir)
         

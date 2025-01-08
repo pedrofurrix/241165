@@ -205,9 +205,9 @@ def plot_voltage(bot_dir,results):
     saveplot(bot_dir,title3,fig3)
     plt.close()
 
-def get_folder(CF,E,cell_id):
+def get_folder(CF,E,cell_id,var):
     currdir=os.getcwd()
-    top_dir=os.path.join(currdir,f"data\\{cell_id}\\{CF}Hz")
+    top_dir=os.path.join(currdir,f"data\\{cell_id}\\{var}\\{CF}Hz")
     bot_dir=os.path.join(top_dir,f"{E}Vm")
     print(currdir)
     print(top_dir)

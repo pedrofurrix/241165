@@ -13,6 +13,7 @@ freq = 500
 amp = 50
 
 # Fixed parameters
+var="cfreq"
 cell_id=1
 theta = 180
 phi = 0
@@ -24,7 +25,7 @@ ton = 0
 dur = simtime
 run_id = 0
 cb=True
-e_dir,t, is_xtra,vrec,soma_v,dend_v,axon_v,cell=run_simulation(cell_id, theta, phi, simtime, dt, amp, depth, freq, modfreq,ton,dur,run_id,cb)
+e_dir,t, is_xtra,vrec,soma_v,dend_v,axon_v,cell=run_simulation(cell_id, theta, phi, simtime, dt, amp, depth, freq, modfreq,ton,dur,run_id,cb,var)
 
 save_plots(e_dir,t,is_xtra,vrec,soma_v,dend_v,axon_v)
 
