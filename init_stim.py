@@ -42,7 +42,7 @@ def initialize_cell(cell_id,theta,phi):
 # Restore Steady State
 def restore_steady_state(cell_id):
     currdir=os.getcwd()
-    path = os.path.join(currdir, f"data\\{cell_id}\\steady_state\\steady_state.bin")
+    path = os.path.join(currdir,"data",str(cell_id),"steady_state","steady_state.bin")
     savestate = h.SaveState()
     h_file = h.File(path)
     savestate.fread(h_file)

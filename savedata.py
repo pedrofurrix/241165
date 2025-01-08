@@ -17,8 +17,7 @@ def saveparams(run_id,simparams,stimparams,var):
     #Create folder for run
     current_directory = os.getcwd()
     print(current_directory)
-    folder_name=f"data\\{simparams[2]}"
-    top_top_dir = os.path.join(current_directory, folder_name)
+    top_top_dir = os.path.join(current_directory, "data", str(simparams[2]))
 
     if not os.path.exists(top_top_dir):
         os.makedirs(top_top_dir)

@@ -103,8 +103,8 @@ def run_steady(run_id,cell_id,theta,phi,simtime,dt,ton,amp,depth,dur,freq,modfre
         current_directory = os.getcwd()
         print(current_directory)
 
-        folder_name=f"data\\{cell_id}\\steady_state"
-        ssfolder = os.path.join(current_directory, folder_name,f"{simtime}")
+        folder_name=os.path.join(current_directory,"data",str(cell_id), "steady_state")
+        ssfolder = os.path.join(folder_name,f"{simtime}")
         if not os.path.exists(ssfolder):
             os.makedirs(ssfolder)
 
@@ -159,7 +159,7 @@ def run_steady(run_id,cell_id,theta,phi,simtime,dt,ton,amp,depth,dur,freq,modfre
     save_steady_state(folder_name,steady_state)
 
     import savedata
-    folder=f"data\\{cell_id}"
+    folder=os.path.join(os.getcwd(),"data",str(cell_id))
     savedata.savelocations_xtra(folder,cell)
     savedata.save_locations(folder,cell)
     savedata.savezones(folder,cell)
@@ -246,8 +246,8 @@ def run_threshold(run_id,cell_id,theta,phi,simtime,dt,ton,amp,depth,dur,freq,mod
         #Create folder for run
         current_directory = os.getcwd()
         print(current_directory)
-
-        folder_name=f"data\\{cell_id}\\threshold\\steady_state"
+        folder_name=os.path.join(current_directory,"data",str(cell_id),"threshold", "steady_state")
+ 
         ssfolder = os.path.join(current_directory, folder_name,f"{simtime}")
         if not os.path.exists(ssfolder):
             os.makedirs(ssfolder)
@@ -299,7 +299,7 @@ def run_threshold(run_id,cell_id,theta,phi,simtime,dt,ton,amp,depth,dur,freq,mod
 
     save_steady_state(folder_name,steady_state)
 
-    import savedata
-    folder=f"data\\{cell_id}"
-    savedata.savelocations_xtra(folder,cell)
-    savedata.save_locations(folder,cell)
+    # import savedata
+    # folder=os.path.join(os.getcwd(),"data",str(cell_id))
+    # savedata.savelocations_xtra(folder,cell)
+    # savedata.save_locations(folder,cell)
