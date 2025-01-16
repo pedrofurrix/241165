@@ -13,11 +13,10 @@ def savedata(bot_dir,t,is_xtra,vrec):
     data.to_csv(path,index=False)
     print(f"Vrec and is saved to {path}")
 
-def saveparams(run_id,simparams,stimparams,var):
+def saveparams(run_id,simparams,stimparams,var,data_dir):
     #Create folder for run
-    current_directory = os.getcwd()
-    print(current_directory)
-    top_top_dir = os.path.join(current_directory, "data", str(simparams[2]))
+    print(data_dir)
+    top_top_dir = os.path.join(data_dir, "data", str(simparams[2]))
 
     if not os.path.exists(top_top_dir):
         os.makedirs(top_top_dir)
@@ -26,9 +25,18 @@ def saveparams(run_id,simparams,stimparams,var):
     if not os.path.exists(vari):
         os.makedirs(vari)
     
-    top_dir = os.path.join(vari, f"{int(stimparams[3])}Hz")
-    if not os.path.exists(top_dir):
-        os.makedirs(top_dir)
+    if var=="cfreq":
+        top_dir = os.path.join(vari, f"{int(stimparams[3])}Hz")
+        if not os.path.exists(top_dir):
+            os.makedirs(top_dir)
+    elif var=="depth":
+        top_dir = os.path.join(vari, f"{int(stimparams[4]*10)}")
+        if not os.path.exists(top_dir):
+            os.makedirs(top_dir)
+    elif var=="modfreq":
+        top_dir = os.path.join(vari, f"{int(stimparams[5])}Hz")
+        if not os.path.exists(top_dir):
+            os.makedirs(top_dir)
         
     bot_dir = os.path.join(top_dir,f"{int(stimparams[0])}Vm")
     if not os.path.exists(bot_dir):
@@ -55,7 +63,10 @@ def saveparams(run_id,simparams,stimparams,var):
             "Duration": stimparams[2],  # Duration in ms
             "Carrier Frequency": stimparams[3],  # Frequency in Hz
             "Modulation Depth": stimparams[4],  # Depth (0-1)
-            "Modulation Frequency": stimparams[5]  # Modulation frequency in Hz
+            "Modulation Frequency": stimparams[5],  # Modulation frequency in Hz
+            "Ramp Up":stimparams[8],
+            "RUp Duration":stimparams[9],
+            "tau":stimparams[10]
         }
     }
     with open(path, "w") as file:

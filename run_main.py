@@ -17,15 +17,19 @@ var="cfreq"
 cell_id=1
 theta = 180
 phi = 0
-simtime = 100
+simtime = 1000
 dt = 0.001
 depth = 1
-modfreq = 100
+modfreq = 10
 ton = 0
 dur = simtime
 run_id = 0
 cb=True
-e_dir,t, is_xtra,vrec,soma_v,dend_v,axon_v,cell=run_simulation(cell_id, theta, phi, simtime, dt, amp, depth, freq, modfreq,ton,dur,run_id,cb,var)
+ramp=True
+ramp_duration=400
+tau=0
+data_dir="/media/sf_Data"
+e_dir,t, is_xtra,vrec,soma_v,dend_v,axon_v,cell=run_simulation(cell_id, theta, phi, simtime, dt, amp, depth, freq, modfreq,ton,dur,run_id,cb,var,ramp,ramp_duration,tau,data_dir)
 
 save_plots(e_dir,t,is_xtra,vrec,soma_v,dend_v,axon_v)
 

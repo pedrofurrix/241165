@@ -37,13 +37,14 @@ def initialize_cell(cell_id,theta,phi):
 
     return cell, cell_name
 
-def setstim(simtime,dt,ton,amp,depth,dur,freq,modfreq):
-    time,stim1=stim.ampmodulation(ton,amp,depth,dt,dur,simtime,freq,modfreq)
+def setstim(simtime,dt,ton,amp,depth,dur,freq,modfreq,ramp,ramp_duration,tau):
+    time,stim1=stim.ampmodulation(ton,amp,depth,dt,dur,simtime,freq,modfreq,ramp,ramp_duration,tau)
     return time,stim1
 
-def run_steady(run_id,cell_id,theta,phi,simtime,dt,ton,amp,depth,dur,freq,modfreq):
+
+def run_steady(run_id,cell_id,theta,phi,simtime,dt,ton,amp,depth,dur,freq,modfreq,ramp=False,ramp_duration=0,tau=None,data_dir=os.getcwd()):
     cell,cell_name=initialize_cell(cell_id,theta,phi)
-    time,stim1=setstim(simtime,dt,ton,amp,depth,dur,freq,modfreq)
+    time,stim1=setstim(simtime,dt,ton,amp,depth,dur,freq,modfreq,ramp,ramp_duration,tau)
 
       # Setup Recording Variables to watch over the simulation.
     t=h.Vector().record(h._ref_t)
@@ -98,12 +99,12 @@ def run_steady(run_id,cell_id,theta,phi,simtime,dt,ton,amp,depth,dur,freq,modfre
     plt.show()
 
 
-    def saveparams(cell_id,simtime):
+    def saveparams(cell_id,simtime,data_dir):
         #Create folder for run
-        current_directory = os.getcwd()
-        print(current_directory)
 
-        folder_name=os.path.join(current_directory,"data",str(cell_id), "steady_state")
+        print(data_dir)
+
+        folder_name=os.path.join(data_dir,"data",str(cell_id), "steady_state")
         ssfolder = os.path.join(folder_name,f"{simtime}")
         if not os.path.exists(ssfolder):
             os.makedirs(ssfolder)
@@ -159,10 +160,12 @@ def run_steady(run_id,cell_id,theta,phi,simtime,dt,ton,amp,depth,dur,freq,modfre
     save_steady_state(folder_name,steady_state)
 
     import savedata
-    folder=os.path.join(os.getcwd(),"data",str(cell_id))
+    folder=os.path.join(data_dir,"data",str(cell_id))
     savedata.savelocations_xtra(folder,cell)
     savedata.save_locations(folder,cell)
     savedata.savezones(folder,cell)
+
+##### THRESHOLD
 
 
 def get_results(top_dir):
@@ -205,9 +208,9 @@ def setup_apcs(top_dir,cell):
 
 
 
-def run_threshold(run_id,cell_id,theta,phi,simtime,dt,ton,amp,depth,dur,freq,modfreq,top_dir):
+def run_threshold(run_id,cell_id,theta,phi,simtime,dt,ton,amp,depth,dur,freq,modfreq,top_dir,var="cfreq",ramp=False,ramp_duration=0,tau=None):
     cell,cell_name=initialize_cell(cell_id,theta,phi)
-    time,stim1=setstim(simtime,dt,ton,amp,depth,dur,freq,modfreq)
+    time,stim1=setstim(simtime,dt,ton,amp,depth,dur,freq,modfreq,ramp,ramp_duration,tau)
     segments,APCounters=setup_apcs(top_dir,cell)
 
     h.dt = dt
@@ -242,13 +245,13 @@ def run_threshold(run_id,cell_id,theta,phi,simtime,dt,ton,amp,depth,dur,freq,mod
 
     max_dif=max(delta,key=abs)
 
-    def saveparams(cell_id,simtime):
+    def saveparams(cell_id,simtime,data_dir):
         #Create folder for run
-        current_directory = os.getcwd()
-        print(current_directory)
-        folder_name=os.path.join(current_directory,"data",str(cell_id),"threshold", "steady_state")
- 
-        ssfolder = os.path.join(current_directory, folder_name,f"{simtime}")
+        
+        print(data_dir)
+        folder_name=os.path.join(data_dir,"data",str(cell_id),var,"threshold", "steady_state")
+        ssfolder = os.path.join(folder_name,f"{simtime}")
+
         if not os.path.exists(ssfolder):
             os.makedirs(ssfolder)
 

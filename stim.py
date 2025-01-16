@@ -132,7 +132,7 @@ def simpleplaysin(amp,dt,tstop,freq):
 #Variable start and end time for stimulation, defined by ton and dur
 #depth is between 0 and 1, with 1 being 100% mod depth
 #modfreq is in Hz
-def ampmodulation(ton,amp,depth,dt,dur,simtime,freq,modfreq):
+def ampmodulation(ton,amp,depth,dt,dur,simtime,freq,modfreq,ramp=False,ramp_duration=0,tau=None):
   times=np.arange(0,simtime+dt,dt)
   # 1000 is a factor because dt is in ms and freq in Hz
   #added -ton so that it starts at 0
@@ -140,15 +140,25 @@ def ampmodulation(ton,amp,depth,dt,dur,simtime,freq,modfreq):
     mod=1/2*(np.sin(2*np.pi*modfreq/1000*(times-ton-1/(4*modfreq/1000)))+1)*depth+(1-depth)
   else:
     mod=1
+    
   stim=amp*mod*np.sin(2*np.pi*freq/1000*(times-ton))
   #Making it so that while time<ton and time>ton+dur, stim value=0
   stim[times < ton] = 0
   stim[times > (ton + dur)] = 0
+  if ramp:
+    if tau is None:
+      current=generate_ramp_current(times, ramp_duration,dt)
+    elif tau is 0:
+      tau=ramp_duration/3
+      current=generate_exponential_ramp_current(times, ramp_duration, tau,dt)
+    else:
+      current=generate_exponential_ramp_current(times, ramp_duration, tau,dt)
+      
+    stim=stim*current
 
   t=h.Vector(times)
   stim1=h.Vector(stim)
-  stim1.play(h._ref_stim_xtra,t,0)
-
+  stim1.play(h._ref_is_xtra,t,0)
   return t,stim1
 
 #amp in mA, dt,dur and simtime in ms, freq in Hz
@@ -171,18 +181,57 @@ def ampmodulation_wiki(ton,amp,depth,dt,dur,simtime,freq,modfreq):
 
   t=h.Vector(times)
   stim1=h.Vector(stim)
-  stim1.play(h._ref_stim_xtra,t,0)
+  stim1.play(h._ref_is_xtra,t,0)
   return t,stim1
 
-# h.xpanel("Choose stimulation mode", 0)
-# h.xbutton("stimplay", stimplay)
-# h.xbutton("ampmodulation",ampmodulation())
-# h.xpanel(535,652)
+def generate_ramp_current(times, ramp_duration,dt):
+    """
+    Generate a stimulation current that ramps up and holds steady.
 
-# h.xpanel("Temporal parameters for extracellular stimulation", 0)
-# h.xvalue("Delay (ms)", "DEL", 1, "setstim(DEL,DUR,AMP)", 0, 1)
-# h.xvalue("Duration (ms)", "DUR", 1, "setstim(DEL,DUR,AMP)", 0, 1)
-# h.xvalue("Amplitude (uA or V/m)", "AMP", 1, "setstim(DEL,DUR,AMP)", 0, 1)
-# h.xpanel(535,652)
+    Parameters:
+        duration (float): Total duration of the simulation in ms.
+        dt (float): Time step in ms.
+        ramp_duration (float): Duration of the ramp-up phase in ms.
+        max_current (float): Maximum current value (nA).
 
-# print(np.linspace(0,100,11))
+    Returns:
+        np.array: Array of stimulation current values.
+    """
+    
+    current = np.zeros_like(times)     # Initialize current array
+
+    # Ramp phase
+    current[times<=ramp_duration] = np.linspace(0, 1, int(ramp_duration/dt)+1)
+    
+    # Steady phase
+    current[times>ramp_duration] = 1
+
+    return current
+
+
+def generate_exponential_ramp_current(times, ramp_duration, tau,dt):
+    """
+    Generate an exponentially ramping stimulation current that stabilizes at a maximum value.
+
+    Parameters:
+        duration (float): Total duration of the simulation in ms.
+        dt (float): Time step in ms.
+        ramp_duration (float): Duration of the ramp-up phase in ms.
+        max_current (float): Maximum current value (nA).
+        tau (float): Time constant for the exponential ramp (ms).
+
+    Returns:
+        np.array: Array of stimulation current values.
+    """
+
+    current = np.zeros_like(times)     # Initialize current array
+    
+    # Exponential ramp phase
+    # ramp_end_index = int(ramp_duration / dt)
+    # ramp_time = times[:ramp_end_index]  # Time points during ramp
+    ramp_time = times[times <= ramp_duration]
+    current[times <= ramp_duration] = (1 - np.exp(-ramp_time / tau))    
+    # Steady phase
+    current[times>ramp_duration] = 1  # Maintain max current after ramp duration
+    
+    return current

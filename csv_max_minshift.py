@@ -12,22 +12,39 @@ import pickle
 import json
 import h5py
 
+
+
+
 def load_voltages_csv(bot_dir):
+    '''
+    Loads voltages file - from the Electric field folder
+    '''
+    
     vfile=os.path.join(bot_dir,"run_voltages.csv")
     voltages=pd.read_csv(vfile)
     return voltages
 
-def load_voltages_hdf5(bot_dir):
+def load_voltages_hdf5(bot_dir,filtered=False):
     """
-    Load voltage data from an HDF5 file.
-    """
+    
+    Load voltage data from HDF5 file.
 
-    vfile = os.path.join(bot_dir, "run_voltages.h5")
-    with h5py.File(vfile, "r") as file:
-        # Read time and voltages
-        time = file["time"][:]
-        voltages = file["voltages"][:]
-        segment_names = file["voltages"].attrs["segment_names"]
+    """
+    if not filtered:
+        vfile = os.path.join(bot_dir, "run_voltages.h5")
+        with h5py.File(vfile, "r") as file:
+            # Read time and voltages
+            time = file["time"][:]
+            voltages = file["voltages"][:]
+            segment_names = file["voltages"].attrs["segment_names"]
+
+    else:
+        vfile=os.path.join(bot_dir,"filtered_voltages.h5")
+        with h5py.File(vfile, "r") as file:
+            # Read time and voltages
+            time = file["time"][:]
+            voltages = file["filtered_voltages"][:]
+            segment_names = file["filtered_voltages"].attrs["segment_names"]
     
     # Create a DataFrame for easier handling
     df = pd.DataFrame(voltages, columns=segment_names)
@@ -35,10 +52,12 @@ def load_voltages_hdf5(bot_dir):
     return df
 
 
-def load_params(bot_dir): #Load paramsssssssss (get them into a format where I can easily extract them.., ) - json
-    
+def load_params(param_dir): #Load paramsssssssss (get them into a format where I can easily extract them.., ) - json
+    '''
+    Loads parameters - from json
+    '''
     filename="params.json"
-    path = os.path.join(bot_dir, filename)
+    path = os.path.join(param_dir, filename)
     if not os.path.exists(path):
         raise FileNotFoundError(f"The parameters file does not exist at {path}")
     # Load the JSON file
@@ -50,10 +69,12 @@ def load_params(bot_dir): #Load paramsssssssss (get them into a format where I c
     # Return the parameters
     return simparams, stimparams
 
-def cmax_shift(bot_dir,top_dir, cell=None):
-    voltages=load_voltages_hdf5(bot_dir)
-    headers=voltages.drop(columns=["t"]).columns.tolist()
-    simparams, stimparams=load_params(bot_dir)
+
+def cmax_shift(bot_dir,top_dir,param_dir,var,cell=None, filtered=False):
+    # voltages=load_voltages_csv(bot_dir)
+    voltages=load_voltages_hdf5(bot_dir,filtered)
+    headers=voltages.drop(columns=["t"]).columns.to_list()
+    simparams, stimparams=load_params(param_dir)
 
     num_seg=len(voltages.iloc[0,1:]) #iterate through all but the column that has the time
     v_init=voltages.iloc[0,1:].to_list()
@@ -72,8 +93,9 @@ def cmax_shift(bot_dir,top_dir, cell=None):
     
      
     results = {
-        "EValue": stimparams["E"],
+        "EValue": stimparams["E"]*stimparams["Multiplier"],
         "CFreq": stimparams["Carrier Frequency"],
+        "ModFreq": stimparams["Modulation Frequency"],
         "max_shiftp": max(pshift),
         "min_shiftp": min(pshift),
         "max_shiftn": max(nshift, key=abs),
@@ -112,10 +134,13 @@ def cmax_shift(bot_dir,top_dir, cell=None):
         out_file=os.path.join(bot_dir,"max_shift_data.csv")
         data_pd=pd.DataFrame([data])
         data_pd.to_csv(out_file,index=False)
-        print(f"MaxShift data saved to {out_file}")
 
-        top_file=os.path.join(top_dir, "results_summary.csv")
-        results_df = pd.DataFrame([results])
+        if filtered:
+            top_file=os.path.join(top_dir, "results_summary_filtered.csv")
+            results_df = pd.DataFrame([results])
+        else:
+            top_file=os.path.join(top_dir, "results_summary.csv")
+            results_df = pd.DataFrame([results])
 
         if os.path.exists(top_file):
             # If file exists, append the new results without writing the header
@@ -123,13 +148,35 @@ def cmax_shift(bot_dir,top_dir, cell=None):
         else:
             # If file does not exist, write the results with the header
             results_df.to_csv(top_file, index=False, header=True)
-        print(f"Results summary appended to {top_file}")
+        
     save_max()
 
     return max_shift, max_v, min_v, results
 
-def plot_voltage(bot_dir,results):
+def plot_show(bot_dir,results):
     voltages=load_voltages_hdf5(bot_dir)
+
+    t=voltages["t"]
+    v_maxp_index=results["maxp_index"]
+    v_maxn_index=results["maxn_index"]
+    vmaxp=voltages.iloc[:,v_maxp_index+1]
+    vmaxn=voltages.iloc[:,v_maxn_index+1]
+    segmaxp=results["maxp_seg"]
+    segmaxn=results["maxn_seg"]
+
+    # Plot Max both
+    fig3,ax3=plt.subplots()
+    title3=("Membrane potential over time - Maxshift")
+    ax3.plot(t, vmaxp,label=f"maxp_shift_{segmaxp}")
+    ax3.plot(t, vmaxn,label=f"maxn_shift_{segmaxn}")
+    ax3.set_xlabel("time (ms)")  # Correct method to set labels
+    ax3.set_ylabel("Membrane potential (mV)")
+    ax3.legend()
+    ax3.set_title(title3)  # Optional: add title to the plot
+    return fig3
+
+def plot_voltage(bot_dir,results,filtered=False):
+    voltages=load_voltages_hdf5(bot_dir,filtered)
 
     t=voltages["t"]
 
@@ -154,7 +201,7 @@ def plot_voltage(bot_dir,results):
     # plt.show()
 
     #Plot Max Negative
-    
+
     v_max_index=results["maxn_index"]
     v_min_index=results["minn_index"]
     vmaxn=voltages.iloc[:,v_max_index+1]
@@ -203,17 +250,19 @@ def plot_voltage(bot_dir,results):
     saveplot(bot_dir,title1,fig)
     saveplot(bot_dir,title2,fig2)
     saveplot(bot_dir,title3,fig3)
+
     plt.close()
 
-def get_folder(CF,E,cell_id,var):
-    currdir=os.getcwd()
-    top_dir=os.path.join(currdir,f"data\\{cell_id}\\{var}\\{CF}Hz")
-    bot_dir=os.path.join(top_dir,f"{E}Vm")
-    print(currdir)
+def get_folder(CF,E,cell_id,data_dir,var,filtered=False):
+    top_dir=os.path.join(data_dir, "data",str(cell_id),var,f"{CF}Hz")
+    param_dir=os.path.join(top_dir,f"{E}Vm")
+    if not filtered:
+        bot_dir=param_dir
+    else:
+        bot_dir=os.path.join(param_dir,"filtered")
     print(top_dir)
     print(bot_dir)
-    
-    return top_dir, bot_dir
+    return top_dir, bot_dir,param_dir
 
 # top_dir,bot_dir=get_folder(500,40,1)
 # voltages=load_voltages_hdf5(bot_dir)

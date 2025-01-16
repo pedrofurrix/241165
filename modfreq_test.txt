@@ -1,0 +1,22 @@
+#!/bin/bash
+
+# Create the logs directory if it doesn't exist
+if [ ! -d "logs" ]; then
+  mkdir logs
+fi
+
+source /home/stimsim/Documents/241165/neusin/bin/activate
+
+python3 /home/stimsim/Documents/241165/run_batch.py -f 2000 -v 100 -m 10 >> logs/10.log 2>&1
+
+python3 /home/stimsim/Documents/241165/run_batch.py -f 2000 -v 100 -m 20 >> logs/20.log 2>&1
+
+python3 /home/stimsim/Documents/241165/run_batch.py -f 2000 -v 100 -m 30 >> logs/30.log 2>&1
+
+python3 /home/stimsim/Documents/241165/run_batch.py -f 2000 -v 100 -m 40 >> logs/40.log 2>&1
+
+python3 /home/stimsim/Documents/241165/run_batch.py -f 2000 -v 100 -m 50 >> logs/50.log 2>&1
+
+python3 /home/stimsim/Documents/241165/run_batch.py -f 2000 -v 100 -m 100 >> logs/100.log 2>&1
+
+python3 /home/stimsim/Documents/241165/run_batch.py -f 2000 -v 100 -m 5 >> logs/5.log 2>&1

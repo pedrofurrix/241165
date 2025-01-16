@@ -39,10 +39,10 @@ def initialize_cell(cell_id,theta,phi):
     return cell, cell_name
 
 
+
 # Restore Steady State
-def restore_steady_state(cell_id):
-    currdir=os.getcwd()
-    path = os.path.join(currdir,"data",str(cell_id),"steady_state","steady_state.bin")
+def restore_steady_state(cell_id,data_dir):
+    path = os.path.join(data_dir,"data",str(cell_id),"steady_state","steady_state.bin")
     savestate = h.SaveState()
     h_file = h.File(path)
     savestate.fread(h_file)
@@ -54,8 +54,8 @@ def restore_steady_state(cell_id):
     h.t = 0
     print(f"Steady state restored from {path}, and time reset to {h.t} ms")
 
-def setstim(simtime,dt,ton,amp,depth,dur,freq,modfreq):
-    time,stim1=stim.ampmodulation(ton,amp,depth,dt,dur,simtime,freq,modfreq)
+def setstim(simtime,dt,ton,amp,depth,dur,freq,modfreq,ramp,ramp_duration,tau):
+    time,stim1=stim.ampmodulation(ton,amp,depth,dt,dur,simtime,freq,modfreq,ramp,ramp_duration,tau)
     return time,stim1
 
 def add_callback(cell,e_dir,simtime,dt):
@@ -66,9 +66,9 @@ def add_callback(cell,e_dir,simtime,dt):
     file, callback, finalize=record_voltages_gpt.record_voltages_hdf5(cell,e_dir,max_timesteps,buffer_size=100000)
     return file, callback, finalize
 
-def run_simulation(cell_id, theta, phi, simtime, dt, amp, depth, freq, modfreq,ton,dur,run_id,cb=True,var="no_var"):
+def run_simulation(cell_id, theta, phi, simtime, dt, amp, depth, freq, modfreq,ton,dur,run_id,cb=True,var="no_var",ramp=False,ramp_duration=0,tau=None,data_dir=os.getcwd()):
     cell, cell_name = initialize_cell(cell_id, theta, phi)
-    time,stim1= setstim(simtime,dt,ton,amp,depth,dur,freq,modfreq)
+    time,stim1= setstim(simtime,dt,ton,amp,depth,dur,freq,modfreq,ramp,ramp_duration,tau)
 
     # Setup Recording Variables to watch over the simulation.
     t=h.Vector().record(h._ref_t)
@@ -79,7 +79,7 @@ def run_simulation(cell_id, theta, phi, simtime, dt, amp, depth, freq, modfreq,t
     vrec = h.Vector().record(h._ref_vrec)  # records vrec at each timestep
 
     h.finitialize(-72)
-    restore_steady_state(cell_id)
+    restore_steady_state(cell_id,data_dir)
 
 
     h.frecord_init()
@@ -89,9 +89,9 @@ def run_simulation(cell_id, theta, phi, simtime, dt, amp, depth, freq, modfreq,t
 
     #Save params
     simparams=[dt,simtime,cell_id,cell_name]
-    stimparams=[amp,ton,dur,freq,depth,modfreq,theta,phi]
+    stimparams=[amp,ton,dur,freq,depth,modfreq,theta,phi,ramp,ramp_duration,tau]
 
-    freq_dir, e_dir = saveparams(run_id, simparams, stimparams,var)
+    freq_dir, e_dir = saveparams(run_id, simparams, stimparams,var,data_dir)
     save_es(freq_dir, amp, cell)
 
     # Record voltages
