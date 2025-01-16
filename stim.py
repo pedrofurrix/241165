@@ -153,12 +153,12 @@ def ampmodulation(ton,amp,depth,dt,dur,simtime,freq,modfreq,ramp=False,ramp_dura
       current=generate_exponential_ramp_current(times, ramp_duration, tau,dt)
     else:
       current=generate_exponential_ramp_current(times, ramp_duration, tau,dt)
-      
+
     stim=stim*current
 
   t=h.Vector(times)
   stim1=h.Vector(stim)
-  stim1.play(h._ref_is_xtra,t,0)
+  stim1.play(h._ref_stim_xtra,t,0)
   return t,stim1
 
 #amp in mA, dt,dur and simtime in ms, freq in Hz
@@ -181,7 +181,7 @@ def ampmodulation_wiki(ton,amp,depth,dt,dur,simtime,freq,modfreq):
 
   t=h.Vector(times)
   stim1=h.Vector(stim)
-  stim1.play(h._ref_is_xtra,t,0)
+  stim1.play(h._ref_stim_xtra,t,0)
   return t,stim1
 
 def generate_ramp_current(times, ramp_duration,dt):

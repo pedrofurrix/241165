@@ -133,7 +133,7 @@ def run_steady(run_id,cell_id,theta,phi,simtime,dt,ton,amp,depth,dur,freq,modfre
         
         return ssfolder,folder_name
 
-    ssfolder,folder_name=saveparams(cell_id,simtime)
+    ssfolder,folder_name=saveparams(cell_id,simtime,data_dir)
 
     from savedata import saveplot
     saveplot(ssfolder,title1,fig)
@@ -208,7 +208,7 @@ def setup_apcs(top_dir,cell):
 
 
 
-def run_threshold(run_id,cell_id,theta,phi,simtime,dt,ton,amp,depth,dur,freq,modfreq,top_dir,var="cfreq",ramp=False,ramp_duration=0,tau=None):
+def run_threshold(run_id,cell_id,theta,phi,simtime,dt,ton,amp,depth,dur,freq,modfreq,top_dir,var="cfreq",ramp=False,ramp_duration=0,tau=None,data_dir=os.getcwd()):
     cell,cell_name=initialize_cell(cell_id,theta,phi)
     time,stim1=setstim(simtime,dt,ton,amp,depth,dur,freq,modfreq,ramp,ramp_duration,tau)
     segments,APCounters=setup_apcs(top_dir,cell)
@@ -279,7 +279,7 @@ def run_threshold(run_id,cell_id,theta,phi,simtime,dt,ton,amp,depth,dur,freq,mod
         
         return ssfolder,folder_name
 
-    ssfolder,folder_name=saveparams(cell_id,simtime)
+    ssfolder,folder_name=saveparams(cell_id,simtime,data_dir)
 
     def save_steady_state(folder_name,steady_state):
         savestate=h.SaveState()
