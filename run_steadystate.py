@@ -18,7 +18,7 @@ ton = 0
 dur = simtime
 run_id = 0
 ramp=True
-ramp_duration=
-tau=
+ramp_duration=400
+tau=0
 data_dir="/media/sf_Data"
 run_steady(run_id,cell_id,theta,phi,simtime,dt,ton,amp,depth,dur,freq,modfreq,ramp,ramp_duration,tau,data_dir)

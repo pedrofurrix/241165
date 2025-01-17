@@ -148,7 +148,7 @@ def ampmodulation(ton,amp,depth,dt,dur,simtime,freq,modfreq,ramp=False,ramp_dura
   if ramp:
     if tau is None:
       current=generate_ramp_current(times, ramp_duration,dt)
-    elif tau is 0:
+    elif tau == 0:
       tau=ramp_duration/3
       current=generate_exponential_ramp_current(times, ramp_duration, tau,dt)
     else:
