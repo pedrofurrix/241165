@@ -29,7 +29,8 @@ ramp=True
 ramp_duration=400
 tau=0
 data_dir="/media/sf_Data"
-e_dir,t, is_xtra,vrec,soma_v,dend_v,axon_v,cell=run_simulation(cell_id, theta, phi, simtime, dt, amp, depth, freq, modfreq,ton,dur,run_id,cb,var,ramp,ramp_duration,tau,data_dir)
+e_dir,t, is_xtra,vrec,soma_v,dend_v,axon_v,cell=run_simulation(cell_id, theta, phi, simtime, dt, amp, depth, freq, modfreq,
+                                                               ton,dur,run_id,cb,var,ramp,ramp_duration,tau,data_dir)
 
 save_plots(e_dir,t,is_xtra,vrec,soma_v,dend_v,axon_v)
 

@@ -6,8 +6,7 @@ import csv
 import json
 
 def get_main_folder(cell_id,var,data_dir):
-    top_top_dir=os.path.join(data_dir,"data","no_ramp",str(cell_id),str(var))
-    print(currdir)
+    top_top_dir=os.path.join(data_dir,"data",str(cell_id),str(var))
     print(top_top_dir)
     return top_top_dir
 

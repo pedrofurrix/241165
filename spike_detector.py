@@ -5,8 +5,8 @@ import pickle
 from csv_max_minshift import load_voltages_hdf5,load_params,get_folder
 import json
 
-def load_zones(cell_id):
-    path=os.path.join(f"data\\{cell_id}","cellzones.json")
+def load_zones(cell_id,data_dir):
+    path=os.path.join(data_dir,"data", str(cell_id), "cellzones.json")
       # Check if the file exists
     if not os.path.exists(path):
         print(f"Error: The file {path} does not exist.")
@@ -19,16 +19,16 @@ def load_zones(cell_id):
     print(f"Successfully loaded zones from {path}")
     return section_data
 
-def spike_detector(bot_dir,threshold=0):
+def spike_detector(bot_dir,param_dir,data_dir=os.getcwd(),threshold=0,filtered=False):
 
     '''
     Voltages is a pd dataframe with the columns as the membrane potential for each segment and the rows being this potential over time
     '''
 
-    voltages=load_voltages_hdf5(bot_dir)
-    simparams, stimparams=load_params(bot_dir)
+    voltages=load_voltages_hdf5(bot_dir,filtered)
+    simparams, stimparams=load_params(param_dir)
     cell_id=simparams["cell_id"]
-    section_data=load_zones(cell_id)
+    section_data=load_zones(cell_id,data_dir)
 
     spikedata = {zone: {} for zone in section_data.keys()}
 

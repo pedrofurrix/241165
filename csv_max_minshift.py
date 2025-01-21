@@ -93,7 +93,7 @@ def cmax_shift(bot_dir,top_dir,param_dir,var,cell=None, filtered=False):
     
      
     results = {
-        "EValue": stimparams["E"]*stimparams["Multiplier"],
+        "EValue": stimparams["E"],
         "CFreq": stimparams["Carrier Frequency"],
         "ModFreq": stimparams["Modulation Frequency"],
         "max_shiftp": max(pshift),

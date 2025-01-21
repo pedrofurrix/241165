@@ -37,7 +37,12 @@ def saveparams(run_id,simparams,stimparams,var,data_dir):
         top_dir = os.path.join(vari, f"{int(stimparams[5])}Hz")
         if not os.path.exists(top_dir):
             os.makedirs(top_dir)
-        
+    else:
+        top_dir = os.path.join(vari, f"{int(stimparams[3])}Hz")
+        if not os.path.exists(top_dir):
+            os.makedirs(top_dir)
+
+            
     bot_dir = os.path.join(top_dir,f"{int(stimparams[0])}Vm")
     if not os.path.exists(bot_dir):
         os.makedirs(bot_dir)
