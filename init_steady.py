@@ -200,10 +200,15 @@ def get_max_segs(top_dir,cell):
     return segments
 
 def setup_apcs(top_dir,cell):
-    segments=get_max_segs(top_dir,cell)
+    # segments=get_max_segs(top_dir,cell)
+
     APCounters=[]
+    segments=[seg for sec in cell.all for seg in sec]    
+    
     for segment in segments:
-        APCounters.append(h.APCount(segment))
+        ap_counter = h.APCount(segment)  # Use parentheses, not square brackets
+        APCounters.append(ap_counter)
+        
     return segments,APCounters
 
 
@@ -249,7 +254,7 @@ def run_threshold(run_id,cell_id,theta,phi,simtime,dt,ton,amp,depth,dur,freq,mod
         #Create folder for run
         
         print(data_dir)
-        folder_name=os.path.join(data_dir,"data",str(cell_id),var,"threshold", "steady_state")
+        folder_name=os.path.join(data_dir,"data",str(cell_id),str(var),"threshold", "steady_state")
         ssfolder = os.path.join(folder_name,f"{simtime}")
 
         if not os.path.exists(ssfolder):

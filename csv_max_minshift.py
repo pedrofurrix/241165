@@ -253,7 +253,7 @@ def plot_voltage(bot_dir,results,filtered=False):
 
     plt.close()
 
-def get_folder(CF,E,cell_id,data_dir,var,filtered=False):
+def get_folder(CF,E,cell_id,data_dir=os.getcwd(),var="cfreq",filtered=False):
     top_dir=os.path.join(data_dir, "data",str(cell_id),var,f"{CF}Hz")
     param_dir=os.path.join(top_dir,f"{E}Vm")
     if not filtered:
