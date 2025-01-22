@@ -1,28 +1,30 @@
 #!/bin/bash
 
-# Create the logs directory if it doesn't exist
+# Create the logs directory if it doesn't exist 
+
 if [ ! -d "logs" ]; then
   mkdir logs
 fi
 
 source /home/stimsim/Documents/241165/neusin/bin/activate
 
-python3 /home/stimsim/Documents/241165/run_parser_multi.py -f 2000 -v 1 2 3 5 10 15 20 30 40 50 70 100 200 -m 10 -b >> logs/10.log 2>&1
+python3 /home/stimsim/Documents/241165/run_parser_multi.py -f 2000 -v 1 2 3 5 10 15 20 30 40 50 70 100 200 -m 10 -d 1 -b >> logs/2000.log 2>&1
 
-python3 /home/stimsim/Documents/241165/run_parser_multi.py -f 4000 -v 1 2 3 5 10 15 20 30 40 50 70 100 200 -m 10 -b >> logs/10.log 2>&1
+python3 /home/stimsim/Documents/241165/run_parser_multi.py -f 4000 -v 1 2 3 5 10 15 20 30 40 50 70 100 200 -m 10 -d 1 -b >> logs/4000.log 2>&1
 
-python3 /home/stimsim/Documents/241165/run_parser_multi.py -f 5000 -v 1 2 3 5 10 15 20 30 40 50 70 100 200 -m 10 -b >> logs/10.log 2>&1
+python3 /home/stimsim/Documents/241165/run_parser_multi.py -f 5000 -v 1 2 3 5 10 15 20 30 40 50 70 100 200 -m 10 -d 1 -b >> logs/5000.log 2>&1
 
-python3 /home/stimsim/Documents/241165/run_parser_multi.py -f 8000 -v 1 2 3 5 10 15 20 30 40 50 70 100 200 -m 10 -b >> logs/10.log 2>&1
+python3 /home/stimsim/Documents/241165/run_parser_multi.py -f 8000 -v 1 2 3 5 10 15 20 30 40 50 70 100 200 -m 10 -d 1 -b >> logs/8000.log 2>&1
 
-python3 /home/stimsim/Documents/241165/run_parser_multi.py -f 10000 -v 1 2 3 5 10 15 20 30 40 50 70 100 200 -m 10 -b >> logs/10.log 2>&1
+python3 /home/stimsim/Documents/241165/run_parser_multi.py -f 10000 -v 1 2 3 5 10 15 20 30 40 50 70 100 200 -m 10 -d 1 -b >> logs/10000.log 2>&1
 
-python3 /home/stimsim/Documents/241165/run_parser_multi.py -f 15000 -v 1 2 3 5 10 15 20 30 40 50 70 100 200 -m 10 -b >> logs/10.log 2>&1
+python3 /home/stimsim/Documents/241165/run_parser_multi.py -f 15000 -v 1 2 3 5 10 15 20 30 40 50 70 100 200 -m 10 -d 1 -b >> logs/15000.log 2>&1
 
-python3 /home/stimsim/Documents/241165/run_parser_multi.py -f 20000 -v 1 2 3 5 10 15 20 30 40 50 70 100 200 -m 10 -b >> logs/10.log 2>&1
+python3 /home/stimsim/Documents/241165/run_parser_multi.py -f 20000 -v 1 2 3 5 10 15 20 30 40 50 70 100 200 -m 10 -d 1 -b >> logs/20000.log 2>&1
 
-python3 /home/stimsim/Documents/241165/run_parser_multi.py -f 25000 -v 1 2 3 5 10 15 20 30 40 50 70 100 200 -m 10 -b >> logs/10.log 2>&1
+python3 /home/stimsim/Documents/241165/run_parser_multi.py -f 25000 -v 1 2 3 5 10 15 20 30 40 50 70 100 200 -m 10 -d 1 -b >> logs/25000.log 2>&1
 
-python3 /home/stimsim/Documents/241165/run_parser_multi.py -f 30000 -v 1 2 3 5 10 15 20 30 40 50 70 100 200 -m 10 -b >> logs/10.log 2>&1
+python3 /home/stimsim/Documents/241165/run_parser_multi.py -f 30000 -v 1 2 3 5 10 15 20 30 40 50 70 100 200 -m 10 -d 1 -b >> logs/30000.log 2>&1
 
-python3 /home/stimsim/Documents/241165/run_parser_multi.py -f 35000 -v 1 2 3 5 10 15 20 30 40 50 70 100 200 -m 10 -b >> logs/10.log 2>&1
+python3 /home/stimsim/Documents/241165/run_parser_multi.py -f 35000 -v 1 2 3 5 10 15 20 30 40 50 70 100 200 -m 10 -d 1 -b >> logs/35000.log 2>&1
+
