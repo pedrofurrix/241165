@@ -22,8 +22,8 @@ def run_single_simulation(freq, amp):
     cell_id=1
     theta = 180
     phi = 0
-    simtime = 1000
-    dt = 0.001
+    simtime = 100
+    dt = 0.01
     depth = 1
     modfreq = 10
     ton = 0
@@ -33,11 +33,12 @@ def run_single_simulation(freq, amp):
     ramp=True
     ramp_duration=400
     tau=0
-    data_dir="/media/sf_Data"
+    # data_dir="/media/sf_Data"
+    data_dir=os.getcwd()
     try:
         e_dir,t, is_xtra,vrec,soma_v,dend_v,axon_v,cell=run_simulation(cell_id, theta, phi, simtime, dt, amp, depth, freq, modfreq,
                                                                ton,dur,run_id,cb,var,ramp,ramp_duration,tau,data_dir)
-        save_plots(e_dir, t, is_xtra, vrec, soma_v, dend_v)
+        save_plots(e_dir, t, is_xtra, vrec, soma_v, dend_v,axon_v)
     except Exception as e:
         print(f"Error during simulation for freq={freq}, v_plate={amp}: {e}")
     finally:
@@ -48,12 +49,13 @@ def run_single_simulation(freq, amp):
 
 if __name__ == '__main__':
     
-    num_processes = cpu_count()
+    max_processes = cpu_count()
 
     v_values = [10, 20]
-    CFreqs = [100]
-
+    CFreqs = [1000]
+   
     inputs = [(freq, amp) for freq in CFreqs for amp in v_values]
+    num_processes=len(inputs)
     # processes = []
 
     # for freq in CFreqs:
@@ -65,7 +67,8 @@ if __name__ == '__main__':
     # for p in processes:
     #     p.join()
     # Use a Pool to parallelize simulations
-
+    if num_processes>max_processes:
+        raise ValueError("Too many processes")
     with Pool(processes=num_processes) as pool:
         # Run simulations in parallel
         pool.starmap(run_single_simulation, inputs)

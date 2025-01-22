@@ -8,7 +8,7 @@ from init_steady import run_steady
 cell_id=1
 theta = 180
 phi = 0
-simtime = 1000
+simtime = 2000
 dt = 0.1
 amp = 0
 depth = 1
@@ -20,5 +20,5 @@ run_id = 0
 ramp=True
 ramp_duration=400
 tau=0
-data_dir="/media/sf_Data"
+data_dir=os.getcwd()
 run_steady(run_id,cell_id,theta,phi,simtime,dt,ton,amp,depth,dur,freq,modfreq,ramp,ramp_duration,tau,data_dir)

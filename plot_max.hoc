@@ -1,3 +1,4 @@
+/*
 objref soma_point3
 // color_plotmax(plot_mode,save_fig)
 // plot_mode: 1 colors nodes of Ranvier, Myelin, and Unmyelinated axon separately (default)
@@ -40,3 +41,4 @@ proc color_plotmax() { local plot_mode,save_fig
 		shplot.printfile(cellfile)
 	}		
 }
+*/
