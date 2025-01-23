@@ -111,7 +111,7 @@ def custom_threshold(cell, cell_id,freq, segments,var,max_timesteps = 100000, bu
                 flush_to_disk()
 
         # Callback to record voltages at each timestep
-        callback = h.beforestep_callback(cell.soma(0.5))
+        callback = h.beforestep_callback(cell.soma[0](0.5))
         callback.set_callback(record_step)
 
         def finalize():

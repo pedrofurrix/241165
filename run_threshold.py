@@ -14,6 +14,7 @@ from init_threshold import threshold
 save_out=sys.stdout
 
 def run_threshold(cell_id,freq,var):
+    start=time.time()
     #Parameters to change
     # freq = 2000
     amp = 100
@@ -32,7 +33,7 @@ def run_threshold(cell_id,freq,var):
     theta = 180
     phi = 0
     simtime = 1000
-    dt = 0.001
+    dt = 0.01
     depth = 1
     modfreq = 10
     ton = 0
@@ -46,10 +47,10 @@ def run_threshold(cell_id,freq,var):
     threshold(cell_id, theta, phi, simtime, dt, amp, depth, freq, modfreq,ton,dur,top_dir,
               thresh=thresh,cb=cb,var=var,ramp=ramp,ramp_duration=ramp_duration,tau=tau,data_dir=data_dir)
     sys.stdout=save_out
+    end=time.time()
+    print(f"The time of execution of above program is : {end-start} s")
+    print(f"The time of execution of above program is : {(end-start)/60} mins")
 
 
-start=time.time()
-run_threshold(1,2000,"cfreq")
-end=time.time()
-print(f"The time of execution of above program is : {end-start} s")
-print(f"The time of execution of above program is : {(end-start)/60} mins")
+run_threshold(1,200,"cfreq")
+
