@@ -1,4 +1,4 @@
-from neuron import h,gui
+from neuron import h
 import numpy as np
 from neuron.units import mV,ms,um
 import matplotlib.pyplot as plt
@@ -10,13 +10,13 @@ import all_voltages
 import record_voltages_gpt
 
 # import load_files
+h.load_file("stdrun.hoc")
 h.load_file("interpCoordinates.hoc")
 h.load_file("setPointers.hoc")
 h.load_file("calcVe_noGUI.hoc")
 h.load_file("cellChooser.hoc")
 h.load_file("setParams.hoc")
 h.load_file("editMorphology.hoc")
-h.load_file("stdrun.hoc")
 h.load_file("plot_max.hoc")
 h.load_file("field.hoc")
 

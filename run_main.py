@@ -17,7 +17,7 @@ var="cfreq"
 cell_id=1
 theta = 180
 phi = 0
-simtime = 1000
+simtime = 10
 dt = 0.001
 depth = 1
 modfreq = 10
@@ -28,7 +28,7 @@ cb=True
 ramp=True
 ramp_duration=400
 tau=0
-data_dir="/media/sf_Data"
+data_dir=os.getcwd()
 e_dir,t, is_xtra,vrec,soma_v,dend_v,axon_v,cell=run_simulation(cell_id, theta, phi, simtime, dt, amp, depth, freq, modfreq,
                                                                ton,dur,run_id,cb,var,ramp,ramp_duration,tau,data_dir)
 

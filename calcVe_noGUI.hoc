@@ -14,13 +14,15 @@ create sElec
 theta = 180 // deg - polar angle
 phi = 0 // deg - azimuthal angle 
 
-objref shplot, pElec,sElec_list // for shape plot
+// objref shplot, pElec,sElec_list // for shape plot
 proc getes() {
 	if (stim_mode == 1) { // intracortical microstimulation
         // Calculate potentials at each compartmentf or current point-source, amp = 1 µA
         // use current point source at xe, ye, ze				
 		calcesI(xe,ye,ze,sigma_e)	
         // Draw red dot for electrode location
+
+		/*
 		create sElec							
 		sElec {
 			// make it 1 um long
@@ -33,11 +35,15 @@ proc getes() {
         color_plotmax()
         shplot.point_mark(pElec,2,"O",5) // mark electrode point         		
         shplot.label(600,100,"Electrode position",1,1,0,0,2)
+		*/
+
 		printf("Calculated potentials for current point-source at (%.1f,%.1f,%.1f) um\n",xe,ye,ze)
 	} else if (stim_mode == 2) { // uniform E stimulation		
 		// Calculate potentials for uniform E-field in NEURON 
 		calcesE(theta,phi)
         // remove ICMS point 
+		
+		/*
         shplot.point_mark_remove(pElec)
         // Draw violet line for E-field vector
         create sElec						
@@ -54,6 +60,8 @@ proc getes() {
         color_plotmax()    
         shplot.color_list(sElec_list,7)  
         shplot.label(600,100,"E-field vector",1,1,0,0,7)  
+		*/
+
 		printf("Calculated potentials for theta = %g deg, phi = %g deg\n",theta,phi)		
 	} 	
 }

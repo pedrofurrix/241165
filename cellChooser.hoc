@@ -116,7 +116,7 @@ proc cell_chooser() { local start_ind, synapses_enabled localobj terminal_sec_st
         // Initilize potentials and waveform
         // getes() // set Ve(x,y,z)
         // setstim(DEL,DUR,AMP) // set waveform (current of E-field)  
-        color_plotmax()
+        // color_plotmax()
     } else {
         print "Cell model not selected"
     }     
@@ -196,7 +196,7 @@ obfunc get_main_ax2() { local i, biggest_branch_diam, biggest_branch_ind, at_ter
 	return main_ax
 }
 
-
+/*
 objref soma_point3
 // color_plotmax(plot_mode,save_fig)
 // plot_mode: 1 colors nodes of Ranvier, Myelin, and Unmyelinated axon separately (default)
@@ -239,3 +239,4 @@ proc color_plotmax() { local plot_mode,save_fig
 		shplot.printfile(cellfile)
 	}		
 }
+*/
