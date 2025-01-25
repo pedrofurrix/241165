@@ -146,8 +146,9 @@ def threshsearch(cell_id,cell,simtime,dt,ton,amp,depth,dur,freq,modfreq,APCounte
         save_apcs(folder,APCounters,segments)
         # get_maxv(cell_id,freq,segments,writer2)
 
-    any1=any(apc.n>5 for apc in APCounters)
-    print(any1)
+    nspikes=(simtime-ramp_duration)/1000*modfreq
+
+    any1=any(apc.n>=nspikes for apc in APCounters)
 
     # ax,fig,title=plot_v(recordings,segments,freq,amp)
     return any1

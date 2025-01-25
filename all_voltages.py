@@ -102,7 +102,7 @@ def custom_threshold(cell, cell_id,freq, segments,var,max_timesteps = 100000, bu
             
             # Store the current time and voltages in the buffer
             time_buffer[buffer_index] = h.t
-            is_buffer[buffer_index]= h.is_xtra
+            is_buffer[buffer_index]= h.stim_xtra
             voltages_buffer[buffer_index, :] = [seg.v for seg in segments]
             buffer_index += 1
 
