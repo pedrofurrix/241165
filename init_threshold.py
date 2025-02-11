@@ -61,7 +61,7 @@ def setstim(simtime,dt,ton,amp,depth,dur,freq,modfreq,ramp,ramp_duration,tau):
 
 def add_callback(cell,cell_id,freq,segments,var,data_dir,save):
     from all_voltages import custom_threshold
-    folder,file,callback,voltages,finalize=custom_threshold(cell,cell_id,freq,segments,var,data_dir=data_dir,save=save,max_timesteps=1000000,buffer_size=1000000)
+    folder,file,callback,voltages,finalize=custom_threshold(cell,cell_id,freq,segments,var,data_dir=data_dir,save=save,max_timesteps=1000000,buffer_size=100000)
     return  folder,file,callback,voltages,finalize
     # file,callback,finalize=record_voltages_gpt.record_voltages_hdf5(cell,e_dir)
     # return file, callback
@@ -118,6 +118,7 @@ def initialize(cell_id, theta, phi,top_dir):
 
 def threshsearch(cell_id,cell,simtime,dt,ton,amp,depth,dur,freq,modfreq,APCounters,
                  segments, var,ramp,ramp_duration, tau, thresh=0,cb=False,save=True,data_dir=os.getcwd()):
+    
     time,stim1= setstim(simtime,dt,ton,amp,depth,dur,freq,modfreq,ramp,ramp_duration,tau)
     
     print(f"Set stim with amplitude: {amp} V/m")
@@ -146,10 +147,12 @@ def threshsearch(cell_id,cell,simtime,dt,ton,amp,depth,dur,freq,modfreq,APCounte
         save_apcs(folder,APCounters,segments)
         # get_maxv(cell_id,freq,segments,writer2)
 
-    any1=any(apc.n>5 for apc in APCounters)
-    print(any1)
+    nspikes=(simtime-ramp_duration)/1000*modfreq
+
+    any1=any(apc.n>=nspikes for apc in APCounters)
 
     # ax,fig,title=plot_v(recordings,segments,freq,amp)
+
     return any1
 
 def threshold(cell_id, theta, phi, simtime, dt, amp, depth, freq, modfreq,ton,dur,top_dir,
@@ -179,20 +182,22 @@ def threshold(cell_id, theta, phi, simtime, dt, amp, depth, freq, modfreq,ton,du
             savethresh(amp,freq,cell_id)
             return amp
         
-        epsilon = high*1e-2
+        
         amp=(high+low)/2
+        epsilon = min(high*5e-2,100)
 
         while (high - low) > epsilon:
             print(f"Binary search: low={low}, high={high}, amp={amp}")
+            
 
             if threshsearch(cell_id,cell,simtime,dt,ton,amp,depth,dur,freq,modfreq,APCounters,segments,
                         var=var,ramp=ramp,ramp_duration=ramp_duration, tau=tau, thresh=thresh,data_dir=data_dir):
                 high = amp
             else:
                 low = amp
-                
+    
             amp = (high + low)/2
-            epsilon=amp*1e-2
+            epsilon = min(high*5e-2,100)
         
         # Stop the loop if stoprun_flag is True
         if h.stoprun==1: 

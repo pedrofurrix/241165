@@ -18,35 +18,21 @@ def saveparams(run_id,simparams,stimparams,var,data_dir):
     print(data_dir)
     top_top_dir = os.path.join(data_dir, "data", str(simparams[2]))
 
-    if not os.path.exists(top_top_dir):
-        os.makedirs(top_top_dir)
-
-    vari=os.path.join(top_top_dir,f"{var}")
-    if not os.path.exists(vari):
-        os.makedirs(vari)
-    
-    if var=="cfreq":
+    # Create all necessary directories with exist_ok=True
+    vari = os.path.join(top_top_dir, f"{var}")
+    if var == "cfreq":
         top_dir = os.path.join(vari, f"{int(stimparams[3])}Hz")
-        if not os.path.exists(top_dir):
-            os.makedirs(top_dir)
-    elif var=="depth":
-        top_dir = os.path.join(vari, f"{int(stimparams[4]*10)}")
-        if not os.path.exists(top_dir):
-            os.makedirs(top_dir)
-    elif var=="modfreq":
+    elif var == "depth":
+        top_dir = os.path.join(vari, f"{int(stimparams[4] * 10)}")
+    elif var == "modfreq":
         top_dir = os.path.join(vari, f"{int(stimparams[5])}Hz")
-        if not os.path.exists(top_dir):
-            os.makedirs(top_dir)
     else:
         top_dir = os.path.join(vari, f"{int(stimparams[3])}Hz")
-        if not os.path.exists(top_dir):
-            os.makedirs(top_dir)
-
-            
-    bot_dir = os.path.join(top_dir,f"{int(stimparams[0])}Vm")
-    if not os.path.exists(bot_dir):
-        os.makedirs(bot_dir)
-
+    
+    bot_dir = os.path.join(top_dir, f"{int(stimparams[0])}Vm")
+    
+    # Use os.makedirs with exist_ok=True
+    os.makedirs(bot_dir, exist_ok=True)
 
     filename="params.json"
     path=os.path.join(bot_dir,filename)
@@ -199,3 +185,4 @@ def savezones(top_top_dir,cell):
     with open(path, "w") as f:
         json.dump(section_data, f, indent=4)
     print(f"Section data has been saved to {path}")
+

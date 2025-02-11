@@ -42,7 +42,7 @@ def setstim(simtime,dt,ton,amp,depth,dur,freq,modfreq,ramp,ramp_duration,tau):
     return time,stim1
 
 
-def run_steady(run_id,cell_id,theta,phi,simtime,dt,ton,amp,depth,dur,freq,modfreq,ramp=False,ramp_duration=0,tau=None,data_dir=os.getcwd()):
+def run_steady(run_id,cell_id,theta,phi,simtime,dt,ton,amp,depth,dur,freq,modfreq,ramp=False,ramp_duration=0,tau=None,data_dir=os.getcwd(),threshold=1e-7):
     cell,cell_name=initialize_cell(cell_id,theta,phi)
     time,stim1=setstim(simtime,dt,ton,amp,depth,dur,freq,modfreq,ramp,ramp_duration,tau)
 
@@ -66,7 +66,7 @@ def run_steady(run_id,cell_id,theta,phi,simtime,dt,ton,amp,depth,dur,freq,modfre
         global voltages
         voltages=[seg.v for sec in cell.all for seg in sec]
 
-    h.cvode.event(simtime-20, record_voltages)
+    h.cvode.event(simtime-1000, record_voltages)
 
     h.continuerun(simtime)
 
@@ -77,7 +77,7 @@ def run_steady(run_id,cell_id,theta,phi,simtime,dt,ton,amp,depth,dur,freq,modfre
 
     delta = [final-v for final,v in zip(final_v, voltages)]
     # Check steady_state one time point
-    def steady_state_reached(threshold=1e-3):
+    def steady_state_reached(threshold):
         if abs(max(delta,key=abs)) >= threshold:
             return False
         return True
@@ -189,7 +189,7 @@ def get_max_segs(top_dir,cell):
             segment_loc = float(seg.split('(')[1].split(')')[0])  # Example: 0.5
 
             # Loop through all sections in the cell
-            for sec in cell.all:  # Assuming `cell.all` is a list of all sections
+            for sec in cell.all:  # cell.all is a list of all sections
                 if sec.name() == section_name:
                     # Access the segment
                     segment=sec(segment_loc)    
@@ -200,20 +200,23 @@ def get_max_segs(top_dir,cell):
     return segments
 
 def setup_apcs(top_dir,cell):
+    """
+    Set up action potential counters for every segment in the cell.
+    """
     # segments=get_max_segs(top_dir,cell)
 
     APCounters=[]
     segments=[seg for sec in cell.all for seg in sec]    
     
     for segment in segments:
-        ap_counter = h.APCount(segment)  # Use parentheses, not square brackets
+        ap_counter = h.APCount(segment) 
         APCounters.append(ap_counter)
         
     return segments,APCounters
 
 
 
-def run_threshold(run_id,cell_id,theta,phi,simtime,dt,ton,amp,depth,dur,freq,modfreq,top_dir,var="cfreq",ramp=False,ramp_duration=0,tau=None,data_dir=os.getcwd()):
+def run_threshold(run_id,cell_id,theta,phi,simtime,dt,ton,amp,depth,dur,freq,modfreq,top_dir,var="cfreq",ramp=False,ramp_duration=0,tau=None,data_dir=os.getcwd(),threshold=1e-7):
     cell,cell_name=initialize_cell(cell_id,theta,phi)
     time,stim1=setstim(simtime,dt,ton,amp,depth,dur,freq,modfreq,ramp,ramp_duration,tau)
     segments,APCounters=setup_apcs(top_dir,cell)
@@ -229,7 +232,7 @@ def run_threshold(run_id,cell_id,theta,phi,simtime,dt,ton,amp,depth,dur,freq,mod
         global voltages
         voltages=[seg.v for sec in cell.all for seg in sec]
 
-    h.cvode.event(simtime-20, record_voltages)
+    h.cvode.event(simtime-1000, record_voltages)
 
     h.continuerun(simtime)
 
@@ -245,7 +248,6 @@ def run_threshold(run_id,cell_id,theta,phi,simtime,dt,ton,amp,depth,dur,freq,mod
             return False
         return True
     
-    threshold=1e-3
     steady_state=steady_state_reached(threshold)
 
     max_dif=max(delta,key=abs)

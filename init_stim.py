@@ -92,7 +92,7 @@ def run_simulation(cell_id, theta, phi, simtime, dt, amp, depth, freq, modfreq,t
     stimparams=[amp,ton,dur,freq,depth,modfreq,theta,phi,ramp,ramp_duration,tau]
 
     freq_dir, e_dir = saveparams(run_id, simparams, stimparams,var,data_dir)
-    save_es(freq_dir, amp, cell)
+    # save_es(freq_dir, amp, cell) #Bugging for multi-proc run
 
     # Record voltages
     if cb:
