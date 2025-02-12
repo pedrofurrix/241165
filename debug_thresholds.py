@@ -19,7 +19,7 @@ import savedata as savedata
 print(os.getcwd())
 
 def get_voltages(cell_id,freq,var,data_dir=os.getcwd()):
-    folder=os.path.join(data_dir,"data",str(cell_id),str(var),"threshold",f"{freq}Hz")
+    folder=os.path.join(data_dir,"data",str(cell_id),str(var),"threshold",f"{int(freq)}Hz")
     path=os.path.join(os.getcwd(),folder)
     file=os.path.join(path,"run_voltages.csv")
     print(file)
@@ -27,7 +27,7 @@ def get_voltages(cell_id,freq,var,data_dir=os.getcwd()):
     return voltages,folder
 
 def get_voltages_hdf5(cell_id,freq,var,data_dir=os.getcwd()):
-    folder=os.path.join(data_dir,"data",str(cell_id),str(var),"threshold",f"{freq}Hz")
+    folder=os.path.join(data_dir,"data",str(cell_id),str(var),"threshold",f"{int(freq)}Hz")
     filepath=os.path.join(folder,"run_voltages.h5")
     with h5py.File(filepath, 'r') as file:
         # Access datasets

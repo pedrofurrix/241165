@@ -38,7 +38,7 @@ def custom_threshold(cell, cell_id,freq, segments,var,max_timesteps = 100000, bu
         flush_callback: The callback for flushing data to disk.
     """
     # Define the path for the HDF5 file
-    folder=os.path.join(data_dir,"data",str(cell_id),str(var),"threshold",f"{freq}Hz")
+    folder=os.path.join(data_dir,"data",str(cell_id),str(var),"threshold",f"{int(freq)}Hz")
 
     if not os.path.exists(folder):
         os.makedirs(folder)

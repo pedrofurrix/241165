@@ -8,65 +8,66 @@ fi
 
 source /home/stimsim/Documents/241165/neusin/bin/activate
 
-python3 /home/stimsim/Documents/241165/run_batch.py -f 2000 -c 1 >> logs/1.log 2>&1
+python3 /home/stimsim/Documents/241165/run_parser_threshold.py -f 2000 -c 1 >> logs/1.log 2>&1
 
-python3 /home/stimsim/Documents/241165/run_batch.py -f 4000 -c 1 >> logs/1.log 2>&1
 
-python3 /home/stimsim/Documents/241165/run_batch.py -f 5000 -c 1 >> logs/1.log 2>&1
+python3 /home/stimsim/Documents/241165/run_parser_threshold.py -f 4000 -c 1 >> logs/1.log 2>&1
 
-python3 /home/stimsim/Documents/241165/run_batch.py -f 8000 -c 1 >> logs/1.log 2>&1
+python3 /home/stimsim/Documents/241165/run_parser_threshold.py -f 5000 -c 1 >> logs/1.log 2>&1
 
-python3 /home/stimsim/Documents/241165/run_batch.py -f 10000 -c 1 >> logs/1.log 2>&1
+python3 /home/stimsim/Documents/241165/run_parser_threshold.py -f 8000 -c 1 >> logs/1.log 2>&1
 
-python3 /home/stimsim/Documents/241165/run_batch.py -f 15000 -c 1 >> logs/1.log 2>&1
+python3 /home/stimsim/Documents/241165/run_parser_threshold.py -f 10000 -c 1 >> logs/1.log 2>&1
 
-python3 /home/stimsim/Documents/241165/run_batch.py -f 20000 -c 1 >> logs/1.log 2>&1
+python3 /home/stimsim/Documents/241165/run_parser_threshold.py -f 15000 -c 1 >> logs/1.log 2>&1
 
-python3 /home/stimsim/Documents/241165/run_batch.py -f 25000 -c 1 >> logs/1.log 2>&1
+python3 /home/stimsim/Documents/241165/run_parser_threshold.py -f 20000 -c 1 >> logs/1.log 2>&1
 
-python3 /home/stimsim/Documents/241165/run_batch.py -f 30000 -c 1 >> logs/1.log 2>&1
+python3 /home/stimsim/Documents/241165/run_parser_threshold.py -f 25000 -c 1 >> logs/1.log 2>&1
 
-python3 /home/stimsim/Documents/241165/run_batch.py -f 35000 -c 1 >> logs/1.log 2>&1
+python3 /home/stimsim/Documents/241165/run_parser_threshold.py -f 30000 -c 1 >> logs/1.log 2>&1
 
-python3 /home/stimsim/Documents/241165/run_batch.py -f 2000 -c 6 >> logs/6.log 2>&1
+python3 /home/stimsim/Documents/241165/run_parser_threshold.py -f 35000 -c 1 >> logs/1.log 2>&1
 
-python3 /home/stimsim/Documents/241165/run_batch.py -f 4000 -c 6 >> logs/6.log 2>&1
+python3 /home/stimsim/Documents/241165/run_parser_threshold.py -f 2000 -c 6 >> logs/6.log 2>&1
 
-python3 /home/stimsim/Documents/241165/run_batch.py -f 5000 -c 6 >> logs/6.log 2>&1
+python3 /home/stimsim/Documents/241165/run_parser_threshold.py -f 4000 -c 6 >> logs/6.log 2>&1
 
-python3 /home/stimsim/Documents/241165/run_batch.py -f 8000 -c 6 >> logs/6.log 2>&1
+python3 /home/stimsim/Documents/241165/run_parser_threshold.py -f 5000 -c 6 >> logs/6.log 2>&1
 
-python3 /home/stimsim/Documents/241165/run_batch.py -f 10000 -c 6 >> logs/6.log 2>&1
+python3 /home/stimsim/Documents/241165/run_parser_threshold.py -f 8000 -c 6 >> logs/6.log 2>&1
 
-python3 /home/stimsim/Documents/241165/run_batch.py -f 15000 -c 6 >> logs/6.log 2>&1
+python3 /home/stimsim/Documents/241165/run_parser_threshold.py -f 10000 -c 6 >> logs/6.log 2>&1
 
-python3 /home/stimsim/Documents/241165/run_batch.py -f 20000 -c 6 >> logs/6.log 2>&1
+python3 /home/stimsim/Documents/241165/run_parser_threshold.py -f 15000 -c 6 >> logs/6.log 2>&1
 
-python3 /home/stimsim/Documents/241165/run_batch.py -f 25000 -c 6 >> logs/6.log 2>&1
+python3 /home/stimsim/Documents/241165/run_parser_threshold.py -f 20000 -c 6 >> logs/6.log 2>&1
 
-python3 /home/stimsim/Documents/241165/run_batch.py -f 30000 -c 6 >> logs/6.log 2>&1
+python3 /home/stimsim/Documents/241165/run_parser_threshold.py -f 25000 -c 6 >> logs/6.log 2>&1
 
-python3 /home/stimsim/Documents/241165/run_batch.py -f 35000 -c 6 >> logs/6.log 2>&1
+python3 /home/stimsim/Documents/241165/run_parser_threshold.py -f 30000 -c 6 >> logs/6.log 2>&1
 
-python3 /home/stimsim/Documents/241165/run_batch.py -f 2000 -c 16 >> logs/16.log 2>&1
+python3 /home/stimsim/Documents/241165/run_parser_threshold.py -f 35000 -c 6 >> logs/6.log 2>&1
 
-python3 /home/stimsim/Documents/241165/run_batch.py -f 4000 -c 16 >> logs/16.log 2>&1
+python3 /home/stimsim/Documents/241165/run_parser_threshold.py -f 2000 -c 16 >> logs/16.log 2>&1
 
-python3 /home/stimsim/Documents/241165/run_batch.py -f 5000 -c 16 >> logs/16.log 2>&1
 
-python3 /home/stimsim/Documents/241165/run_batch.py -f 8000 -c 16 >> logs/16.log 2>&1
+python3 /home/stimsim/Documents/241165/run_parser_threshold.py -f 4000 -c 16 >> logs/16.log 2>&1
 
-python3 /home/stimsim/Documents/241165/run_batch.py -f 10000 -c 16 >> logs/16.log 2>&1
+python3 /home/stimsim/Documents/241165/run_parser_threshold.py -f 5000 -c 16 >> logs/16.log 2>&1
 
-python3 /home/stimsim/Documents/241165/run_batch.py -f 15000 -c 16 >> logs/16.log 2>&1
+python3 /home/stimsim/Documents/241165/run_parser_threshold.py -f 8000 -c 16 >> logs/16.log 2>&1
 
-python3 /home/stimsim/Documents/241165/run_batch.py -f 20000 -c 16 >> logs/16.log 2>&1
+python3 /home/stimsim/Documents/241165/run_parser_threshold.py -f 10000 -c 16 >> logs/16.log 2>&1
 
-python3 /home/stimsim/Documents/241165/run_batch.py -f 25000 -c 16 >> logs/16.log 2>&1
+python3 /home/stimsim/Documents/241165/run_parser_threshold.py -f 15000 -c 16 >> logs/16.log 2>&1
 
-python3 /home/stimsim/Documents/241165/run_batch.py -f 30000 -c 16 >> logs/16.log 2>&1
+python3 /home/stimsim/Documents/241165/run_parser_threshold.py -f 20000 -c 16 >> logs/16.log 2>&1
 
-python3 /home/stimsim/Documents/241165/run_batch.py -f 35000 -c 16 >> logs/16.log 2>&1
+python3 /home/stimsim/Documents/241165/run_parser_threshold.py -f 25000 -c 16 >> logs/16.log 2>&1
 
+python3 /home/stimsim/Documents/241165/run_parser_threshold.py -f 30000 -c 16 >> logs/16.log 2>&1
+
+python3 /home/stimsim/Documents/241165/run_parser_threshold.py -f 35000 -c 16 >> logs/16.log 2>&1
 
 

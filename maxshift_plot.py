@@ -9,8 +9,8 @@ import matplotlib.colors as mcolors
 from matplotlib import cm
 import plotly.graph_objects as go
 import pandas as pd
-import max_minshift
 
+import ast
 
 # max_shift, max_v, min_v, results=max_minshift.cmax_shift(folder)
 
@@ -18,17 +18,29 @@ def load_results(bot_dir):
     path=os.path.join(bot_dir,"max_shift_data.csv")
     max_shift_data=pd.read_csv(path)
     # max_shift=max_shift_data["max_shift"].to_list()
-    return 
+    return max_shift_data
 
 
 #Plot Shape of the max_shift for each compartment, with a color scale
-def plot_maxshift(bot_dir,filename="max_shift",cell=None,max_shift=None):
+def plot_maxshift(bot_dir,filename="max_v",cell=None,max_shift=None):
 
-    if not max_shift:
+    if max_shift is None:
         max_shift_data= load_results(bot_dir)
-        max_shift=max_shift_data[filename].to_list()
-
+        max_shift=max_shift_data[filename].iloc[0]
+        max_shift = ast.literal_eval(max_shift)
+        print(len(max_shift))
+        # print(max_shift)
         
+    
+    print(f"Loaded {len(max_shift)} max_shift values.")
+    # Count total segments in cell.all
+    total_segments = sum(1 for sec in cell.all for seg in sec)
+    print(f"Total segments in cell: {total_segments}")
+
+    # Ensure the lengths match
+    if len(max_shift) != total_segments:
+        raise ValueError(f"Mismatch: max_shift has {len(max_shift)} values but cell has {total_segments} segments.")
+    
     i=0
     for sec in cell.all:
         for seg in sec:
@@ -80,7 +92,7 @@ def plot_maxshift(bot_dir,filename="max_shift",cell=None,max_shift=None):
     plot_bgcolor='rgba(0,0,0,0)'
     )
 
-    fig.show()
+    # fig.show()
     path= os.path.join(bot_dir,f"{filename}.html")
     fig.write_html(path)
     # saveplot()

@@ -11,7 +11,7 @@ os.chdir(script_dir)
 
 parser = ArgumentParser(description="Run a NEURON simulation with specified parameters.")
 parser.add_argument("-f", "--freq", type=float, required=True, help="Frequency (Hz) for the simulation")
-parser.add_argument("-c", "--id", type=float, required=True, help="Frequency (Hz) for the simulation")
+parser.add_argument("-c", "--id", type=int, required=True, help="Frequency (Hz) for the simulation")
 
 args = parser.parse_args()
 
@@ -19,7 +19,7 @@ from filter_and_max import get_folder
 from init_threshold import threshold
 from debug_thresholds import get_maxv,plot_voltage_highest_spiken
 
-def run_threshold(cell_id,freq,var):
+def run_threshold(cell_id,freq,var,data_dir):
     start=time.time()
    
     init_amp = 100

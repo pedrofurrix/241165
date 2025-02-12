@@ -184,7 +184,7 @@ def threshold(cell_id, theta, phi, simtime, dt, amp, depth, freq, modfreq,ton,du
         
         
         amp=(high+low)/2
-        epsilon = min(high*5e-2,100)
+        epsilon = amp*1e-2
 
         while (high - low) > epsilon:
             print(f"Binary search: low={low}, high={high}, amp={amp}")
@@ -197,7 +197,7 @@ def threshold(cell_id, theta, phi, simtime, dt, amp, depth, freq, modfreq,ton,du
                 low = amp
     
             amp = (high + low)/2
-            epsilon = min(high*5e-2,100)
+            epsilon = amp*1e-2
         
         # Stop the loop if stoprun_flag is True
         if h.stoprun==1: 

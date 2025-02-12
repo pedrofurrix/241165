@@ -23,7 +23,7 @@ def run_threshold(cell_id,freq,var,data_dir):
     # var="cfreq"
     top_dir,bot_dir,param_dir=get_folder(freq,amp,cell_id,var=var,filtered=False,data_dir=data_dir)
     # Fixed parameters
-    pathf=os.path.join(data_dir,"data",str(cell_id),str(var),"threshold",f"{freq}Hz")
+    pathf=os.path.join(data_dir,"data",str(cell_id),str(var),"threshold",f"{int(freq)}Hz")
     if not os.path.exists(pathf):
         os.makedirs(pathf)
     path=os.path.join(pathf,'output.log')
