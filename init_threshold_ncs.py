@@ -109,23 +109,25 @@ def setup_apcs(top_dir,cell):
 
 def setup_netcons(top_dir,cell):
     # segments=get_max_segs(top_dir,cell)
-    segments=[seg for sec in cell.all for seg in sec]
+    # segments=[seg for sec in cell.all for seg in sec]
+    segments=[cell.soma[0](0.5)]
     NCs=[]
     Recorders=[h.Vector() for seg in segments]
     for i,segment in enumerate(segments):
         netcon = h.NetCon(segment._ref_v,None)  # Use parentheses, not square brackets
         NCs.append(netcon)
         netcon.record(Recorders[i])
-    return segments,NCs
+    return segments,NCs,Recorders
 
 def initialize(cell_id, theta, phi,top_dir):
     cell, cell_name = initialize_cell(cell_id, theta, phi)
-    segments,APCounters=setup_apcs(top_dir,cell)
+    # segments,APCounters=setup_apcs(top_dir,cell)
+    segments,NCs,Recorders=setup_netcons(top_dir,cell)
     print(f"Initialized")
-    return APCounters,cell,segments
+    return cell,segments,NCs,Recorders
 
 
-def threshsearch(cell_id,cell,simtime,dt,ton,amp,depth,dur,freq,modfreq,APCounters,
+def threshsearch(cell_id,cell,simtime,dt,ton,amp,depth,dur,freq,modfreq,NCs,Recorders,
                  segments, var,ramp,ramp_duration, tau, thresh=0,cb=False,save=True,data_dir=os.getcwd()):
     
     time,stim1= setstim(simtime,dt,ton,amp,depth,dur,freq,modfreq,ramp,ramp_duration,tau)
@@ -142,8 +144,8 @@ def threshsearch(cell_id,cell,simtime,dt,ton,amp,depth,dur,freq,modfreq,APCounte
     h.tstop = simtime
     h.celsius = 37
 
-    for apc in APCounters:
-        apc.thresh=thresh
+    for nc in NCs:
+        nc.threshold=thresh
 
     h.continuerun(simtime)
 
@@ -151,14 +153,26 @@ def threshsearch(cell_id,cell,simtime,dt,ton,amp,depth,dur,freq,modfreq,APCounte
         file.close()
 
     if cb and save:
-
         finalize()
-        save_apcs(folder,APCounters,segments)
         # get_maxv(cell_id,freq,segments,writer2)
 
-    nspikes=(simtime-(ramp_duration+100))/1000*modfreq
+    minspikes=(simtime-(ramp_duration))/1000*modfreq
+    
+    num_spikes=[]
 
-    any1=any(apc.n>=nspikes for apc in APCounters)
+    for recorder in Recorders:
+        spike_count=0
+        spikes=recorder.to_python()
+        if len(spikes) > 0:
+            spike_count += 1  # Always count the first spike
+            for i in range(1, len(spikes)):
+                if spikes[i] - spikes[i-1] > 5:
+                    spike_count += 1  # Count as new spike if time gap is large enough
+        num_spikes.append(spike_count)
+
+    if save:
+        save_spiketimes(folder,Recorders,num_spikes,segments)
+    any1=any(num>=minspikes for num in num_spikes)
 
     # ax,fig,title=plot_v(recordings,segments,freq,amp)
 
@@ -168,13 +182,13 @@ def threshold(cell_id, theta, phi, simtime, dt, amp, depth, freq, modfreq,ton,du
               thresh=0,cb=False,var="cfreq",ramp=False,ramp_duration=0,tau=None,save=True,data_dir=os.getcwd()):
     low=0
     high=1e6
-    APCounters, cell,segments=initialize(cell_id, theta, phi,top_dir)
+    cell,segments,NCs,Recorders=initialize(cell_id, theta, phi,top_dir)
 
     if amp==0: amp=50
 
     while low==0 or high==1e6:
         print(f"Searching bounds: low={low}, high={high}, amp={amp}")
-        if threshsearch(cell_id,cell,simtime,dt,ton,amp,depth,dur,freq,modfreq,APCounters,segments,
+        if threshsearch(cell_id,cell,simtime,dt,ton,amp,depth,dur,freq,modfreq,NCs,Recorders,segments,
                         var=var,ramp=ramp,ramp_duration=ramp_duration, tau=tau, thresh=thresh,data_dir=data_dir):
             high = amp
             amp /= 2  # Reduce amplitude
@@ -201,7 +215,7 @@ def threshold(cell_id, theta, phi, simtime, dt, amp, depth, freq, modfreq,ton,du
         amp = (high + low)/2
         epsilon = amp*1e-2
 
-        if threshsearch(cell_id,cell,simtime,dt,ton,amp,depth,dur,freq,modfreq,APCounters,segments,
+        if threshsearch(cell_id,cell,simtime,dt,ton,amp,depth,dur,freq,modfreq,NCs,Recorders,segments,
                     var=var,ramp=ramp,ramp_duration=ramp_duration, tau=tau, thresh=thresh,data_dir=data_dir):
             high = amp
         else:
@@ -217,7 +231,7 @@ def threshold(cell_id, theta, phi, simtime, dt, amp, depth, freq, modfreq,ton,du
     
     cb=True
     save=True
-    threshsearch(cell_id,cell,simtime,dt,ton,final_amp,depth,dur,freq,modfreq,APCounters,segments,
+    threshsearch(cell_id,cell,simtime,dt,ton,final_amp,depth,dur,freq,modfreq,NCs,Recorders,segments,
                     var=var,ramp=ramp,ramp_duration=ramp_duration, tau=tau, thresh=thresh,data_dir=data_dir,cb=cb,save=save)
     savethresh(final_amp,freq,cell_id,var,data_dir)
     return high
@@ -284,4 +298,32 @@ def save_apcs(folder,APCounters,segments):
 
     with open(file, 'w') as json_file:
         json.dump(data, json_file, indent=4)
+    print(f"Data saved to {file}")
+
+def save_spiketimes(folder,Recorders,num_spikes,segments):
+    """
+    Saves the APCounters and segments data into a JSON file.
+
+    Parameters:
+    - APCounters: A list or array of spike counts (number of spikes per segment).
+    - segments: A list or array of segment identifiers (e.g., segment names or indices).
+    - filename: The name of the file to save the data in (default is "spikes_data.json").
+    """
+    file=os.path.join(folder,"spike_times.json")
+    file_number=os.path.join(folder,"spike_number.json")
+     # Create a dictionary to store the data
+    data = {}
+    num={}
+    # Assuming APCounters and segments have the same length, pair them together
+    for i in range(len(segments)):
+        times=Recorders[i].to_python()
+        data[str(segments[i])] = times
+        num[str(segments[i])]=num_spikes[i]
+     # Save the data to a JSON file
+
+    with open(file, 'w') as json_file:
+        json.dump(data, json_file, indent=4)
+
+    with open(file_number, 'w') as json_file:
+        json.dump(num, json_file, indent=4)
     print(f"Data saved to {file}")     

@@ -21,5 +21,5 @@ ramp=True
 ramp_duration=400
 tau=0
 data_dir=os.getcwd()
-threshold=1e-7
-run_steady(run_id,cell_id,theta,phi,simtime,dt,ton,amp,depth,dur,freq,modfreq,ramp,ramp_duration,tau,data_dir,threshold)
+variation=1e-7
+run_steady(run_id,cell_id,theta,phi,simtime,dt,ton,amp,depth,dur,freq,modfreq,ramp,ramp_duration,tau,data_dir,variation)

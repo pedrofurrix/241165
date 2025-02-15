@@ -66,12 +66,12 @@ if __name__ == "__main__":
     # Get values
     freqs = args.freq
     amps = args.voltage
-    modfreq = args.modfreq
-    depth = args.depth
+    modfreqs = args.modfreq
+    depths = args.depth
 
     if args.batch:
         # Generate all combinations of (freq, amp)
-        param_combinations = list(product(freqs, amps,modfreq,depth))
+        param_combinations = list(product(freqs, amps,modfreqs,depths))
 
         # # Add modfreq and depth to each combination
         # params = [(freq, amp, modfreq, depth) for freq, amp in param_combinations]
@@ -95,5 +95,7 @@ if __name__ == "__main__":
         # Extract single values for freq and amp
         freq = freqs[0]
         amp = amps[0]
+        modfreq = modfreqs[0]
+        depth = depths[0]
 
         run_sim((freq, amp, modfreq, depth))

@@ -214,13 +214,24 @@ def setup_apcs(top_dir,cell):
         
     return segments,APCounters
 
+def setup_netcons(top_dir,cell):
+    # segments=get_max_segs(top_dir,cell)
+    # segments=[seg for sec in cell.all for seg in sec]
+    segments=[cell.soma[0](0.5)]
+    NCs=[]
+    Recorders=[h.Vector() for seg in segments]
+    for i,segment in enumerate(segments):
+        netcon = h.NetCon(segment._ref_v,None)  # Use parentheses, not square brackets
+        NCs.append(netcon)
+        netcon.record(Recorders[i])
+    return segments,NCs,Recorders
 
 
 def run_threshold(run_id,cell_id,theta,phi,simtime,dt,ton,amp,depth,dur,freq,modfreq,top_dir,var="cfreq",ramp=False,ramp_duration=0,tau=None,data_dir=os.getcwd(),threshold=1e-7):
     cell,cell_name=initialize_cell(cell_id,theta,phi)
     time,stim1=setstim(simtime,dt,ton,amp,depth,dur,freq,modfreq,ramp,ramp_duration,tau)
-    segments,APCounters=setup_apcs(top_dir,cell)
-
+    # segments,APCounters=setup_apcs(top_dir,cell)
+    segments,NCs,Recorders=setup_netcons(top_dir,cell)
     h.dt = dt
     h.tstop = simtime
     h.celsius = 37

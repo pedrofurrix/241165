@@ -74,7 +74,7 @@ def get_maxv(cell_id,freq,var,hdf5=True,data_dir=os.getcwd()):
         # Plot only the segment with the highest maximum voltage
         ax.plot(time, voltages[:, max_segment_idx], label=max_segment)
 
-    threshold=get_threshold(freq,cell_id,var)
+    threshold=get_threshold(freq,cell_id,var,data_dir)
     print(threshold)
     # threshold=1656.25
     print(max_v)
@@ -141,6 +141,7 @@ def plot_voltage_highest_spiken(cell_id,freq,var,hdf5=True,data_dir=os.getcwd(),
         ax.set_title(title)
         if save:
             savedata.saveplot(folder,title,fig)
+        plt.close()
         return v_max,time,max_segment
 
 def load_apcs(folder):
