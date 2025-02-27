@@ -94,7 +94,7 @@ def test_subsample(CF,E,cell_id,var="cfreq",data_dir=os.getcwd(),voltages=None,
     fs=1/(dt/1000)
 
     # Create subplots
-    fig, axes = plt.subplots(2, 3, figsize=(15, 10), sharex=False, sharey=False)
+    fig, axes = plt.subplots(2, 2, figsize=(15, 10), sharex=False, sharey=False,dpi=300)
     # Plot 
     ax = axes[0, 0]
 
@@ -126,14 +126,15 @@ def test_subsample(CF,E,cell_id,var="cfreq",data_dir=os.getcwd(),voltages=None,
     ax.set_xlabel("Time (s)")
     ax.set_ylabel("Membrane Potential(mV)")
     ax.grid()
-    dc_v=filter_and_max.butter_lowpass_filter(subsampled,cutoff_dc,target_fs,order=4)
-    ax = axes[0, 2]
-    ax.plot(subsampled_time, dc_v, color='blue')
-    ax.set_title(f"DC: LP Order 8, Cutoffs:{cutoff_dc} Hz")
-    ax.set_xlabel("Time (s)")
-    ax.set_ylabel("Membrane Potential(mV)")
-    ax.grid()
-    title="Testing Processing Filters"
+
+    # dc_v=filter_and_max.butter_lowpass_filter(subsampled,cutoff_dc,target_fs,order=4)
+    # ax = axes[0, 2]
+    # ax.plot(subsampled_time, dc_v, color='blue')
+    # ax.set_title(f"DC: LP Order 8, Cutoffs:{cutoff_dc} Hz")
+    # ax.set_xlabel("Time (s)")
+    # ax.set_ylabel("Membrane Potential(mV)")
+    # ax.grid()
+    title="Processing Pipeline"
 
     fig.suptitle(title, fontsize=16)
     fig.tight_layout(rect=[0, 0, 1, 0.96])  # Leave space for the title

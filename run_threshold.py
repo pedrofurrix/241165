@@ -9,7 +9,13 @@ os.chdir(script_dir)
 from init_stim import run_simulation,save_plots
 
 from filter_and_max import get_folder
-from init_threshold import threshold
+nc=True
+if not nc:
+    from init_threshold import threshold
+else:
+    from init_threshold_ncs import threshold
+
+
 from debug_thresholds import get_maxv,plot_voltage_highest_spiken
 
 save_out=sys.stdout
@@ -18,19 +24,17 @@ def run_threshold(cell_id,freq,var,data_dir):
     start=time.time()
     #Parameters to change
     # freq = 2000
-    amp = 100
-  
-    # var="cfreq"
-    top_dir,bot_dir,param_dir=get_folder(freq,amp,cell_id,var=var,filtered=False,data_dir=data_dir)
-    # Fixed parameters
-    pathf=os.path.join(data_dir,"data",str(cell_id),str(var),"threshold",f"{int(freq)}Hz")
-    if not os.path.exists(pathf):
-        os.makedirs(pathf)
-    path=os.path.join(pathf,'output.log')
-    log_file = open(path, 'a')  # Use 'w' to overwrite or 'a' to append
-    sys.stdout = log_file
-    sys.stderr = log_file
     
+    # # Fixed parameters
+    # pathf=os.path.join(data_dir,"data",str(cell_id),str(var),"threshold",f"{int(freq)}Hz")
+    # if not os.path.exists(pathf):
+    #     os.makedirs(pathf)
+    # path=os.path.join(pathf,'output.log')
+    # log_file = open(path, 'a')  # Use 'w' to overwrite or 'a' to append
+    # sys.stdout = log_file
+    # sys.stderr = log_file
+
+    amp=100
     theta = 180
     phi = 0
     simtime = 1000
@@ -45,8 +49,9 @@ def run_threshold(cell_id,freq,var,data_dir):
     ramp_duration=400
     tau=0
     thresh=20
-    threshold(cell_id, theta, phi, simtime, dt, amp, depth, freq, modfreq,ton,dur,top_dir,
-              thresh=thresh,cb=cb,var=var,ramp=ramp,ramp_duration=ramp_duration,tau=tau,data_dir=data_dir)
+    record_all=False
+    threshold(cell_id, theta, phi, simtime, dt, amp, depth, freq, modfreq,ton,dur,
+              thresh=thresh,cb=cb,var=var,ramp=ramp,ramp_duration=ramp_duration,tau=tau,data_dir=data_dir,record_all=record_all)
     sys.stdout=save_out
     end=time.time()
     print(f"The time of execution of above program is : {end-start} s")

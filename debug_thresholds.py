@@ -18,16 +18,18 @@ import savedata as savedata
 # print("wassup")
 print(os.getcwd())
 
-def get_voltages(cell_id,freq,var,data_dir=os.getcwd()):
-    folder=os.path.join(data_dir,"data",str(cell_id),str(var),"threshold",f"{int(freq)}Hz")
+def get_voltages(cell_id,value,var,data_dir=os.getcwd()):
+
+    folder=os.path.join(data_dir,"data",str(cell_id),str(var),"threshold",f"{int(value)}")
+
     path=os.path.join(os.getcwd(),folder)
     file=os.path.join(path,"run_voltages.csv")
     print(file)
     voltages=pd.read_csv(file)
     return voltages,folder
 
-def get_voltages_hdf5(cell_id,freq,var,data_dir=os.getcwd()):
-    folder=os.path.join(data_dir,"data",str(cell_id),str(var),"threshold",f"{int(freq)}Hz")
+def get_voltages_hdf5(cell_id,value,var,data_dir=os.getcwd()):
+    folder=os.path.join(data_dir,"data",str(cell_id),str(var),"threshold",f"{int(value)}")
     filepath=os.path.join(folder,"run_voltages.h5")
     with h5py.File(filepath, 'r') as file:
         # Access datasets
@@ -39,22 +41,22 @@ def get_voltages_hdf5(cell_id,freq,var,data_dir=os.getcwd()):
         segment_names = file["voltages"].attrs["segment_names"]
     return voltages, time, is_xtra, segment_names,folder
 
-def get_threshold(freq,cell_id,var,data_dir):
+def get_threshold(value,cell_id,var,data_dir):
     folder=os.path.join(data_dir,"data",str(cell_id),str(var),"threshold")
     file=os.path.join(folder,"thresholds.csv")
     thresholds=pd.read_csv(file)
-    threshold=thresholds[thresholds["cfreq"]==int(freq)]["Threshold"].to_list()
+    threshold=thresholds[thresholds["cfreq"]==int(value)]["Threshold"].to_list()
     return threshold
 
-def get_maxv(cell_id,freq,var,hdf5=True,data_dir=os.getcwd()):
+def get_maxv(cell_id,value,var,hdf5=True,data_dir=os.getcwd()):
     if not hdf5:
-        voltages,folder=get_voltages(cell_id,freq,var)
+        voltages,folder=get_voltages(cell_id,value,var,data_dir)
         max_v = voltages.iloc[:, 2:].max().tolist()  # Returns a list of maximum values per segment
         headers=voltages.drop(columns=["t","is_xtra"]).columns.to_list()
         # Find the segment with the highest maximum voltage
         max_segment_idx = np.argmax(max_v)
         max_segment = headers[max_segment_idx]
-        
+    
         fig,ax=plt.subplots()
         time=voltages.iloc[:,0].to_list()
         is_xtra=voltages["is_xtra"].to_list()
@@ -62,7 +64,7 @@ def get_maxv(cell_id,freq,var,hdf5=True,data_dir=os.getcwd()):
 
         ax.plot(time, voltages[max_segment], label=max_segment)
     else:
-        voltages, time, is_xtra, segment_names,folder= get_voltages_hdf5(cell_id,freq,var,data_dir)
+        voltages, time, is_xtra, segment_names,folder= get_voltages_hdf5(cell_id,value,var,data_dir)
         max_v = voltages.max(axis=0)
 
         # Find the segment with the highest maximum voltage
@@ -74,7 +76,7 @@ def get_maxv(cell_id,freq,var,hdf5=True,data_dir=os.getcwd()):
         # Plot only the segment with the highest maximum voltage
         ax.plot(time, voltages[:, max_segment_idx], label=max_segment)
 
-    threshold=get_threshold(freq,cell_id,var,data_dir)
+    threshold=get_threshold(value,cell_id,var,data_dir)
     print(threshold)
     # threshold=1656.25
     print(max_v)
@@ -158,34 +160,9 @@ def get_max_spike_count(data):
 
     return max_segment, max_value
 
-# cell_id=1
-# freq=100
-# var="cfreq"
-# v,time=plot_voltage_highest_spiken(cell_id,freq,var,hdf5=True,save=True)
-
-# # filtered=low_pass.butter_bandpass_filter(v,dt=0.001)
-# from functions.csv_max_minshift import get_folder,load_voltages_hdf5
-# def plot_difference_threshnorm(cell_id,freq,var,amp,hdf5=True,save=True,data_dir=os.getcwd()):   
-#     v_max,time,max_segment= plot_voltage_highest_spiken(cell_id,freq,var,hdf5,data_dir,save=False) 
-#     top_dir, bot_dir, param_dir=get_folder(freq,amp,cell_id,var,data_dir=data_dir)
-#     voltages=load_voltages_hdf5(bot_dir,filtered=False)
-#     threshold=get_threshold(freq,cell_id,var,data_dir)
-#     folder=os.path.join(data_dir,"data",str(cell_id),str(var),"threshold",f"{freq}Hz")
-
-#     v=voltages[max_segment].to_list()
-#     print(v)
-#     fig,ax=plt.subplots()
-#     ax.plot(time,v_max,label="From threshold",alpha=0.5)
-#     # ax.plot(time,v,label="From normal run",alpha=0.5)
-#     ax.set_xlabel("Time (ms)")
-#     ax.set_ylabel("Membrane Potential (mV)")
-#     ax.legend()
-#     title=f"Membrane potential for E={threshold[-1]} V_m vs E={amp}"
-
-#     if save:
-#          savedata.saveplot(folder,title,fig)
-#     else:
-#         plt.show()
-
-# amp=70
-# plot_difference_threshnorm(cell_id,freq,var,amp,hdf5=True,save=False,data_dir=os.getcwd())
+cell_id=1
+value=100
+var="cfreq"
+data_dir=os.getcwd()
+v,time=plot_voltage_highest_spiken(cell_id,value,var,hdf5=True,save=True,data_dir=data_dir)
+max_v=get_maxv(cell_id,value,var,hdf5=True,data_dir=data_dir)

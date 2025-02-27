@@ -26,6 +26,10 @@ def saveparams(run_id,simparams,stimparams,var,data_dir):
         top_dir = os.path.join(vari, f"{int(stimparams[4] * 10)}")
     elif var == "modfreq":
         top_dir = os.path.join(vari, f"{int(stimparams[5])}Hz")
+    elif var == "theta":
+        top_dir = os.path.join(vari, f"{int(stimparams[6])}")   
+    elif var == "phi":
+        top_dir = os.path.join(vari, f"{int(stimparams[7])}")   
     else:
         top_dir = os.path.join(vari, f"{int(stimparams[3])}Hz")
     
@@ -84,7 +88,7 @@ def savelocations_xtra(top_top_dir,cell):
                     writer.writerow([segname,x,y,z])
     return print(f"Saved to {path}")
 
-def save_es(top_dir,Evalue,cell):
+def save_es(top_dir,theta,phi,cell):
     """
     Save 'es' values to a CSV file, appending a new column for each run.
 
@@ -94,23 +98,23 @@ def save_es(top_dir,Evalue,cell):
     - Evalue associated with the files...
     """
     # Convert 'es' to a pandas DataFrame
-    es_values=[seg.es_xtra*Evalue for sec in cell.all for seg in sec]
+    es_values=[seg.es_xtra for sec in cell.all for seg in sec]
     out_file=os.path.join(top_dir,"es_values.csv")
 
     if os.path.exists(out_file):
         # File exists, load existing data
         existing_data = pd.read_csv(out_file)
         # Append the new column
-        es_run = pd.DataFrame({f"Run_{Evalue}": es_values})
-        existing_data[f"Run_{Evalue}"] = es_run[f"Run_{Evalue}"]
+        es_run = pd.DataFrame({f"Run_{theta}_{phi}": es_values})
+        existing_data[f"Run_{theta}_{phi}"] = es_run[f"Run_{theta}_{phi}"]
     else:
         # File does not exist, initialize with the new data
         seg=[seg for sec in cell.all for seg in sec]
-        es_init = pd.DataFrame({"seg_info":seg , f"Run_{Evalue}": es_values})
+        es_init = pd.DataFrame({"seg_info":seg , f"Run_{theta}_{phi}": es_values})
         existing_data = es_init
 
     existing_data.to_csv(out_file, index=False)
-    print(f"'es*V' values saved to {out_file} for Run {Evalue}.")
+    print(f"'es' values saved to {out_file} for Run {theta}_{phi}.")
 
 def saveplot(bot_dir,title,fig_or_ax):
     filename=f"{title}.png"

@@ -8,6 +8,8 @@ from scipy.fft import fftfreq, rfftfreq
 import numpy as np
 import matplotlib.pyplot as plt
 import plotly.graph_objects as go
+from scipy.stats import trim_mean
+import re
 
 from savedata import saveplot
 
@@ -260,7 +262,6 @@ def analyze_shifts(CF,E,cell_id,var="cfreq",data_dir=os.getcwd(),voltages=None, 
 
     return max_shift, max_v, min_v, results
 
-def get_dc()
 
 def plot_max(bot_dir,results,voltages,time,filtered=False):
     v_maxp_index=results["maxp_index"]
@@ -625,3 +626,62 @@ def analyze_fourier_power(CF,E,cell_id,var,filtered=False,data_dir=os.getcwd(),v
 
     return summary
 
+def analyze_fourier_averages(CF,E,cell_id,var,filtered=False,data_dir=os.getcwd()):
+    """
+    Load and summarize Fourier power data from a given directory structure.
+    
+    Args:
+        cell_id: Identifier for the cell.
+        var: The variable of interest ("cfreq" or "modfreq").
+        filtered: Whether to load filtered data.
+    
+    Returns:
+        summary_df: DataFrame summarizing Fourier power.
+        top_dir: Top-level directory where the data was loaded from.
+    """
+    top_dir, bot_dir, param_dir=get_folder(CF,E,cell_id,var,data_dir=data_dir)
+ 
+    average_file = os.path.join(top_dir, "average_fourier.csv")
+
+    # Initialize an empty dictionary to store Fourier power data
+    fourier_data = {}
+    fourier_norm={}
+
+    for folder_name in os.listdir(top_dir):
+        # Construct the full path
+        folder_path = os.path.join(top_dir, folder_name)
+
+        # Check if it's a directory
+        if os.path.isdir(folder_path):
+            print(f"Processing folder: {folder_name}")
+
+            # Extract the number (digits) from the folder name
+            match = re.search(r"\d+", folder_name)
+            if match:
+                evalue = int(match.group())  # Convert to integer
+
+            results_file = os.path.join(folder_path, "fourier_power_analysis.csv")           
+            if os.path.exists(results_file):
+                # Load the Fourier summary file
+                data = pd.read_csv(results_file)
+        
+                norm_power=data["Normalized Power"].tolist()
+                fourier_power=data["Modulation Power"].tolist()
+                
+                # Calculate the trimmed mean (removes lowest and highest 5%)
+                norm_avg = trim_mean(norm_power, proportiontocut=0.05)
+                fourier_avg = trim_mean(fourier_power, proportiontocut=0.05)
+                summary = {
+                        "EValue": evalue,
+                        "CFreq": CF,
+                        "power":fourier_avg,
+                        "norm":norm_avg,
+                }
+                top_file=average_file
+                summary_df = pd.DataFrame([summary])
+                if os.path.exists(top_file):
+                    # If file exists, append the new results without writing the header
+                    summary_df.to_csv(top_file, mode='a', index=False, header=False)
+                else:
+                    # If file does not exist, write the results with the header
+                    summary_df.to_csv(top_file, index=False, header=True)

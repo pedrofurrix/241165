@@ -29,8 +29,13 @@ ramp=True
 ramp_duration=400
 tau=0
 data_dir=os.getcwd()
+ufield=False
+coordinates=[0,0,0]
+rho=100
+
 e_dir,t, is_xtra,vrec,soma_v,dend_v,axon_v,cell=run_simulation(cell_id, theta, phi, simtime, dt, amp, depth, freq, modfreq,
-                                                               ton,dur,run_id,cb,var,ramp,ramp_duration,tau,data_dir)
+                                                               ton,dur,run_id,cb,var,ramp,ramp_duration,tau,data_dir,
+                                                               ufield=ufield,coordinates=coordinates,rho=rho)
 
 save_plots(e_dir,t,is_xtra,vrec,soma_v,dend_v,axon_v)
 

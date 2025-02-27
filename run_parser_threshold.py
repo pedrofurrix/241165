@@ -10,8 +10,15 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 os.chdir(script_dir)
 
 parser = ArgumentParser(description="Run a NEURON simulation with specified parameters.")
-parser.add_argument("-f", "--freq", type=float, required=True, help="Frequency (Hz) for the simulation")
-parser.add_argument("-c", "--id", type=int, required=True, help="Frequency (Hz) for the simulation")
+parser.add_argument("-f", "--freq", type=float, nargs="*", required=False,default=[2000], help="Frequencies (Hz) for the simulations")
+parser.add_argument("-v", "--voltage", type=float, nargs="*", required=False,default=[100], help="Voltages (mV) for the simulations")
+parser.add_argument("-d", "--depth", type=float, nargs="*", required=False,  default=[1.0], help="Modulation depth (0-1)")
+parser.add_argument("-m", "--modfreq", type=float, nargs="*", required=False,  default=[10], help="Modulation Frequency (Hz)")
+parser.add_argument("-t", "--theta", type=float, nargs="*", required=False,  default=[180], help="Polar Angle Theta (0-180) degrees")
+parser.add_argument("-p", "--phi", type=float, nargs="*", required=False,  default=[0], help="Azimuthal Angle Phi (0-360) degrees")
+parser.add_argument("-c", "--id", type=int, required=False,default=1, help="Cell id")
+parser.add_argument("-b","--batch", action="store_true", help="Enable batch processing mode")
+
 
 args = parser.parse_args()
 
@@ -26,7 +33,7 @@ def run_threshold(cell_id,freq,var,data_dir):
     top_dir,bot_dir,param_dir=get_folder(freq,init_amp,cell_id,var=var,filtered=False,data_dir=data_dir)
     
 
-    pathf=os.path.join(data_dir,"data",str(cell_id),str(var),"threshold",f"{freq}Hz")
+    pathf=os.path.join(data_dir,"data",str(cell_id),str(var),"threshold",f"{int(freq)}Hz")
     if not os.path.exists(pathf):
         os.makedirs(pathf,exist_ok=True)
     

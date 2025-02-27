@@ -23,17 +23,22 @@ h.load_file("plot_max.hoc")
 h.load_file("field.hoc")
 
 #Initializes the cell
-def initialize_cell(cell_id,theta,phi):
+def initialize_cell(cell_id,theta,phi,ufield,coordinates,rho):
     h.setParamsAdultHuman()
     h.myelinate_ax=1
     h.cell_chooser(cell_id)
     cell_name = h.cell_names.o(cell_id-1).s  # `.s` converts HOC String to Python string
     cell=h.cell
-
-    h.theta = theta
-    h.phi = phi
-    h.stim_mode=2
-    h.getes()
+    if ufield:
+        h.theta = theta
+        h.phi = phi
+        h.stim_mode=2
+        h.getes()
+    else:
+        h.xe,h.ye,h.ze=coordinates
+        h.sigma_e=rho
+        h.stim_mode=1
+        h.getes()
 
     print(f"Initialized {cell_name}")
 
@@ -59,13 +64,12 @@ def setstim(simtime,dt,ton,amp,depth,dur,freq,modfreq,ramp,ramp_duration,tau):
     time,stim1=stim.ampmodulation(ton,amp,depth,dt,dur,simtime,freq,modfreq,ramp,ramp_duration,tau)
     return time,stim1
 
-def add_callback(cell,cell_id,freq,segments,var,data_dir,save):
+def add_callback(cell,cell_id,freq,modfreq,depth,theta,phi,segments,var,data_dir,save):
     from all_voltages import custom_threshold
-    folder,file,callback,voltages,finalize=custom_threshold(cell,cell_id,freq,segments,var,data_dir=data_dir,save=save,max_timesteps=1000000,buffer_size=100000)
+    folder,file,callback,voltages,finalize=custom_threshold(cell,cell_id,freq,modfreq,depth,theta,phi,segments,var,data_dir=data_dir,save=save,max_timesteps=1000000,buffer_size=100000)
     return  folder,file,callback,voltages,finalize
     # file,callback,finalize=record_voltages_gpt.record_voltages_hdf5(cell,e_dir)
     # return file, callback
-
 
 def get_results(top_dir):
     top_file=os.path.join(top_dir, "results_summary.csv")
@@ -98,16 +102,19 @@ def get_max_segs(top_dir,cell):
     segments=get_segments(segslist)
     return segments
 
-def setup_apcs(top_dir,cell):
+def setup_apcs(cell,record_all):
     # segments=get_max_segs(top_dir,cell)
-    segments=[seg for sec in cell.all for seg in sec]
+    if record_all:
+        segments=[seg for sec in cell.all for seg in sec]
+    else:
+        segments=[cell.soma[0](0.5)]
     APCounters=[]
     for segment in segments:
         ap_counter = h.APCount(segment)  # Use parentheses, not square brackets
         APCounters.append(ap_counter)
     return segments,APCounters
 
-def setup_netcons(top_dir,cell):
+def setup_netcons(cell,record_all):
     # segments=get_max_segs(top_dir,cell)
     segments=[seg for sec in cell.all for seg in sec]
     NCs=[]
@@ -118,14 +125,14 @@ def setup_netcons(top_dir,cell):
         netcon.record(Recorders[i])
     return segments,NCs
 
-def initialize(cell_id, theta, phi,top_dir):
+def initialize(cell_id, theta, phi):
     cell, cell_name = initialize_cell(cell_id, theta, phi)
-    segments,APCounters=setup_apcs(top_dir,cell)
+    segments,APCounters=setup_apcs(cell)
     print(f"Initialized")
     return APCounters,cell,segments
 
 
-def threshsearch(cell_id,cell,simtime,dt,ton,amp,depth,dur,freq,modfreq,APCounters,
+def threshsearch(cell_id,theta,phi,cell,simtime,dt,ton,amp,depth,dur,freq,modfreq,APCounters,
                  segments, var,ramp,ramp_duration, tau, thresh=0,cb=False,save=True,data_dir=os.getcwd()):
     
     time,stim1= setstim(simtime,dt,ton,amp,depth,dur,freq,modfreq,ramp,ramp_duration,tau)
@@ -136,7 +143,7 @@ def threshsearch(cell_id,cell,simtime,dt,ton,amp,depth,dur,freq,modfreq,APCounte
 
     if cb:
         print("Adding Callback")
-        folder,file,callback,voltages,finalize=add_callback(cell,cell_id,freq,segments,var,data_dir,save)
+        folder,file,callback,voltages,finalize=add_callback(cell,cell_id,freq,modfreq,depth,theta,phi,segments,var,data_dir,save)
 
     h.dt = dt
     h.tstop = simtime
@@ -164,17 +171,19 @@ def threshsearch(cell_id,cell,simtime,dt,ton,amp,depth,dur,freq,modfreq,APCounte
 
     return any1
 
-def threshold(cell_id, theta, phi, simtime, dt, amp, depth, freq, modfreq,ton,dur,top_dir,
-              thresh=0,cb=False,var="cfreq",ramp=False,ramp_duration=0,tau=None,save=True,data_dir=os.getcwd()):
+def threshold(cell_id, theta, phi, simtime, dt, amp, depth, freq, modfreq,ton,dur,
+              thresh=0,cb=False,var="cfreq",ramp=False,ramp_duration=0,tau=None,save=True,data_dir=os.getcwd(),
+              record_all=False,ufield=True,coordinates=[0,0,0],rho=0.276e-6):
     low=0
     high=1e6
-    APCounters, cell,segments=initialize(cell_id, theta, phi,top_dir)
+    cell,cell_name=initialize_cell(cell_id, theta, phi,ufield,coordinates,rho)
+    segments,APCounters=setup_apcs(cell,record_all)
 
     if amp==0: amp=50
 
     while low==0 or high==1e6:
         print(f"Searching bounds: low={low}, high={high}, amp={amp}")
-        if threshsearch(cell_id,cell,simtime,dt,ton,amp,depth,dur,freq,modfreq,APCounters,segments,
+        if threshsearch(cell_id,theta,phi,cell,simtime,dt,ton,amp,depth,dur,freq,modfreq,APCounters,segments,
                         var=var,ramp=ramp,ramp_duration=ramp_duration, tau=tau, thresh=thresh,data_dir=data_dir):
             high = amp
             amp /= 2  # Reduce amplitude
@@ -201,7 +210,7 @@ def threshold(cell_id, theta, phi, simtime, dt, amp, depth, freq, modfreq,ton,du
         amp = (high + low)/2
         epsilon = amp*1e-2
 
-        if threshsearch(cell_id,cell,simtime,dt,ton,amp,depth,dur,freq,modfreq,APCounters,segments,
+        if threshsearch(cell_id,theta,phi,cell,simtime,dt,ton,amp,depth,dur,freq,modfreq,APCounters,segments,
                     var=var,ramp=ramp,ramp_duration=ramp_duration, tau=tau, thresh=thresh,data_dir=data_dir):
             high = amp
         else:
@@ -217,18 +226,25 @@ def threshold(cell_id, theta, phi, simtime, dt, amp, depth, freq, modfreq,ton,du
     
     cb=True
     save=True
-    threshsearch(cell_id,cell,simtime,dt,ton,final_amp,depth,dur,freq,modfreq,APCounters,segments,
+    threshsearch(cell_id,theta,phi,cell,simtime,dt,ton,final_amp,depth,dur,freq,modfreq,APCounters,segments,
                     var=var,ramp=ramp,ramp_duration=ramp_duration, tau=tau, thresh=thresh,data_dir=data_dir,cb=cb,save=save)
-    savethresh(final_amp,freq,cell_id,var,data_dir)
+    savethresh(final_amp,freq,modfreq,depth,theta,phi,cell_id,var,data_dir)
     return high
 
-def savethresh(amp,freq,cell_id,var,data_dir):
+def savethresh(amp,freq,modfreq,depth,theta,phi,cell_id,var,data_dir):
     path = os.path.join(data_dir, "data",str(cell_id),str(var),"threshold","thresholds.csv")
     file_exists = os.path.exists(path)
     # Initialize a list to store the updated data
     updated_data = []
-    freq_exists = False  # Flag to check if the frequency exists in the file
-
+    condition_exists = False  # Flag to check if the frequency exists in the file
+    mapping = {
+    "cfreq": freq,
+    "modfreq": modfreq,
+    "theta": theta,
+    "phi": phi,
+    "depth": depth
+    }
+    condition = mapping.get(var)  # Returns None if var is not in the dictionary
     # Check if the file exists
     if file_exists:
         # Read the existing file
@@ -242,9 +258,9 @@ def savethresh(amp,freq,cell_id,var,data_dir):
 
             # Iterate through the rows and update the amp value if the freq matches
             for row in reader:
-                if len(row) >= 2 and row[0] == str(freq):  # Match the frequency
-                    updated_data.append([freq, amp])  # Replace the amp value
-                    freq_exists = True
+                if len(row) >= 2 and row[0] == str(condition):  # Match the frequency
+                    updated_data.append([condition, amp])  # Replace the amp value
+                    condition_exists = True
                 else:
                     updated_data.append(row)  # Keep the row unchanged
     # If the file doesn't exist, create it and add headers
@@ -252,17 +268,17 @@ def savethresh(amp,freq,cell_id,var,data_dir):
         updated_data.append([var, "Threshold"])  # Add header to new file
 
      # If the frequency doesn't exist, add it as a new row
-    if not freq_exists:
+    if not condition_exists:
         if not updated_data: # If the file was empty, add the header
             updated_data.append([var, "Threshold"])
-        updated_data.append([freq, amp])
+        updated_data.append([condition, amp])
     
     # Write the updated data back to the file
     with open(path, mode="w", newline="") as file:
         writer = csv.writer(file)
         writer.writerows(updated_data)  # Write all rows back to the file
     print(amp)
-    print(f"Threshold for frequency {freq} saved to {path}")
+    print(f"Threshold for var:{var}={condition} saved to {path}")
 
 def save_apcs(folder,APCounters,segments):
     """
@@ -273,7 +289,7 @@ def save_apcs(folder,APCounters,segments):
     - segments: A list or array of segment identifiers (e.g., segment names or indices).
     - filename: The name of the file to save the data in (default is "spikes_data.json").
     """
-    file=os.path.join(folder,"spikes_data.json")
+    file=os.path.join(folder,"spike_number.json")
      # Create a dictionary to store the data
     data = {}
     

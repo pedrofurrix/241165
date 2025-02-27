@@ -21,18 +21,23 @@ h.load_file("plot_max.hoc")
 h.load_file("field.hoc")
 
 #Initializes the cell
-def initialize_cell(cell_id,theta,phi):
+def initialize_cell(cell_id,theta,phi,ufield,coordinates,rho):
     
     h.setParamsAdultHuman()
     h.myelinate_ax=1
     h.cell_chooser(cell_id)
     cell_name = h.cell_names.o(cell_id-1).s  # `.s` converts HOC String to Python string
     cell=h.cell
-
-    h.theta = theta
-    h.phi = phi
-    h.stim_mode=2
-    h.getes()
+    if ufield:
+        h.theta = theta
+        h.phi = phi
+        h.stim_mode=2
+        h.getes()
+    else:
+        h.xe,h.ye,h.ze=coordinates
+        h.sigma_e=rho
+        h.stim_mode=1
+        h.getes()
 
     print(f"Initialized {cell_name}")
 
@@ -66,8 +71,8 @@ def add_callback(cell,e_dir,simtime,dt):
     file, callback, finalize=record_voltages_gpt.record_voltages_hdf5(cell,e_dir,max_timesteps,buffer_size=100000)
     return file, callback, finalize
 
-def run_simulation(cell_id, theta, phi, simtime, dt, amp, depth, freq, modfreq,ton,dur,run_id,cb=True,var="no_var",ramp=False,ramp_duration=0,tau=None,data_dir=os.getcwd()):
-    cell, cell_name = initialize_cell(cell_id, theta, phi)
+def run_simulation(cell_id, theta, phi, simtime, dt, amp, depth, freq, modfreq,ton,dur,run_id,cb=True,var="no_var",ramp=False,ramp_duration=0,tau=None,data_dir=os.getcwd(),ufield=True,coordinates=[0,0,0],rho=100):
+    cell, cell_name = initialize_cell(cell_id, theta, phi,ufield,coordinates,rho)
     time,stim1= setstim(simtime,dt,ton,amp,depth,dur,freq,modfreq,ramp,ramp_duration,tau)
 
     # Setup Recording Variables to watch over the simulation.
