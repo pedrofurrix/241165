@@ -20,19 +20,23 @@ h.load_file("field.hoc")
 
 voltages=[]
 #Initializes the cell
-def initialize_cell(cell_id,theta,phi):
+def initialize_cell(cell_id,theta,phi,ufield,coordinates,rho=100):
     
     h.setParamsAdultHuman()
     h.myelinate_ax=1
     h.cell_chooser(cell_id)
     cell_name = h.cell_names.o(cell_id-1).s  # `.s` converts HOC String to Python string
     cell=h.cell
-
-    h.theta = theta
-    h.phi = phi
-    h.stim_mode=2
-    h.getes()
-
+    if ufield:
+        h.theta = theta
+        h.phi = phi
+        h.stim_mode=2
+        h.getes()
+    else:
+        h.xe,h.ye,h.ze=coordinates
+        h.sigma_e=rho
+        h.stim_mode=1
+        h.getes()
     print(f"Initialized {cell_name}")
 
     return cell, cell_name
@@ -42,8 +46,8 @@ def setstim(simtime,dt,ton,amp,depth,dur,freq,modfreq,ramp,ramp_duration,tau):
     return time,stim1
 
 
-def run_steady(run_id,cell_id,theta,phi,simtime,dt,ton,amp,depth,dur,freq,modfreq,ramp=False,ramp_duration=0,tau=None,data_dir=os.getcwd(),threshold=1e-7):
-    cell,cell_name=initialize_cell(cell_id,theta,phi)
+def run_steady(run_id,cell_id,theta,phi,simtime,dt,ton,amp,depth,dur,freq,modfreq,ramp=False,ramp_duration=0,tau=None,data_dir=os.getcwd(),threshold=1e-7,ufield=True,coordinates=[0,0,0],rho=0.276e-6,time_before=1000):
+    cell,cell_name=initialize_cell(cell_id,theta,phi,ufield,coordinates,rho)
     time,stim1=setstim(simtime,dt,ton,amp,depth,dur,freq,modfreq,ramp,ramp_duration,tau)
 
       # Setup Recording Variables to watch over the simulation.
@@ -66,7 +70,7 @@ def run_steady(run_id,cell_id,theta,phi,simtime,dt,ton,amp,depth,dur,freq,modfre
         global voltages
         voltages=[seg.v for sec in cell.all for seg in sec]
 
-    h.cvode.event(simtime-1000, record_voltages)
+    h.cvode.event(simtime-time_before, record_voltages)
 
     h.continuerun(simtime)
 
@@ -82,7 +86,6 @@ def run_steady(run_id,cell_id,theta,phi,simtime,dt,ton,amp,depth,dur,freq,modfre
             return False
         return True
     
-    threshold=1e-3
     steady_state=steady_state_reached(threshold)
 
     max_dif=max(delta,key=abs)
@@ -164,6 +167,7 @@ def run_steady(run_id,cell_id,theta,phi,simtime,dt,ton,amp,depth,dur,freq,modfre
     savedata.savelocations_xtra(folder,cell)
     savedata.save_locations(folder,cell)
     savedata.savezones(folder,cell)
+    savedata.save_es(folder,theta,phi,cell)
 
 ##### THRESHOLD
 
@@ -199,14 +203,17 @@ def get_max_segs(top_dir,cell):
     segments=get_segments(segslist)
     return segments
 
-def setup_apcs(top_dir,cell):
+def setup_apcs(cell,record_all):
     """
     Set up action potential counters for every segment in the cell.
     """
     # segments=get_max_segs(top_dir,cell)
 
     APCounters=[]
-    segments=[seg for sec in cell.all for seg in sec]    
+    if record_all:
+        segments=[seg for sec in cell.all for seg in sec]   
+    else:
+        segments=[cell.soma[0](0.5)]
     
     for segment in segments:
         ap_counter = h.APCount(segment) 
@@ -214,12 +221,29 @@ def setup_apcs(top_dir,cell):
         
     return segments,APCounters
 
+def setup_netcons(cell,record_all):
+    # segments=get_max_segs(top_dir,cell)
+    if record_all:
+        segments=[seg for sec in cell.all for seg in sec]
+    else:
+        segments=[cell.soma[0](0.5)]
+    NCs=[]
+    Recorders=[h.Vector() for seg in segments]
+    for i,segment in enumerate(segments):
+        netcon = h.NetCon(segment._ref_v,None)  # Use parentheses, not square brackets
+        NCs.append(netcon)
+        netcon.record(Recorders[i])
+    return segments,NCs,Recorders
 
 
-def run_threshold(run_id,cell_id,theta,phi,simtime,dt,ton,amp,depth,dur,freq,modfreq,top_dir,var="cfreq",ramp=False,ramp_duration=0,tau=None,data_dir=os.getcwd(),threshold=1e-7):
-    cell,cell_name=initialize_cell(cell_id,theta,phi)
+def run_threshold(run_id,cell_id,theta,phi,simtime,dt,ton,amp,depth,dur,freq,modfreq,var="cfreq",
+                  ramp=False,ramp_duration=0,tau=None,data_dir=os.getcwd(),threshold=1e-7,nc=True,record_all=False,ufield=True,coordinates=[0,0,0],rho=0.276e-6,time_before=1000):
+    cell,cell_name=initialize_cell(cell_id,theta,phi,ufield,coordinates,rho)
     time,stim1=setstim(simtime,dt,ton,amp,depth,dur,freq,modfreq,ramp,ramp_duration,tau)
-    segments,APCounters=setup_apcs(top_dir,cell)
+    if not nc:
+        segments,APCounters=setup_apcs(cell,record_all)
+    else:
+        segments,NCs,Recorders=setup_netcons(cell,record_all)
 
     h.dt = dt
     h.tstop = simtime
@@ -232,7 +256,7 @@ def run_threshold(run_id,cell_id,theta,phi,simtime,dt,ton,amp,depth,dur,freq,mod
         global voltages
         voltages=[seg.v for sec in cell.all for seg in sec]
 
-    h.cvode.event(simtime-1000, record_voltages)
+    h.cvode.event(simtime-time_before, record_voltages)
 
     h.continuerun(simtime)
 

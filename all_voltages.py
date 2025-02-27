@@ -23,7 +23,7 @@ def record_voltages(cell,e_dir):
 
     return file,callback
 
-def custom_threshold(cell, cell_id,freq, segments,var,max_timesteps = 100000, buffer_size=10000,save=False,data_dir=os.getcwd()):
+def custom_threshold(cell,cell_id,freq,modfreq,depth,theta,phi, segments,var,max_timesteps = 100000, buffer_size=10000,save=False,data_dir=os.getcwd()):
     
     """
     Efficiently record voltages from a neuron simulation to an HDF5 file.
@@ -37,8 +37,18 @@ def custom_threshold(cell, cell_id,freq, segments,var,max_timesteps = 100000, bu
         file: The HDF5 file object.
         flush_callback: The callback for flushing data to disk.
     """
+
+    mapping = {
+    "cfreq": freq,
+    "modfreq": modfreq,
+    "theta": theta,
+    "phi": phi,
+    "depth": depth
+    }
+    condition = mapping.get(var)  # Returns None if var is not in the dictionary
+
     # Define the path for the HDF5 file
-    folder=os.path.join(data_dir,"data",str(cell_id),str(var),"threshold",f"{int(freq)}Hz")
+    folder=os.path.join(data_dir,"data",str(cell_id),str(var),"threshold",f"{condition}")
 
     if not os.path.exists(folder):
         os.makedirs(folder)

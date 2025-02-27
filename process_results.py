@@ -240,6 +240,74 @@ def load_fourier_power(cell_id, var,norm=False,data_dir=os.getcwd()):
     return summary_df, summary_norm,top_dir
 
 
+def load_fourier_averages(cell_id, var,norm=False,data_dir=os.getcwd()):
+    """
+    Load and summarize Fourier power data from a given directory structure.
+    
+    Args:
+        cell_id: Identifier for the cell.
+        var: The variable of interest ("cfreq" or "modfreq").
+        filtered: Whether to load filtered data.
+    
+    Returns:
+        summary_df: DataFrame summarizing Fourier power.
+        top_dir: Top-level directory where the data was loaded from.
+    """
+    top_dir = get_main_folder(cell_id, var,data_dir)
+  
+    power_file = os.path.join(top_dir, "fourier_average_power.csv")
+    norm_file = os.path.join(top_dir, "fourier_average_norm.csv")
+
+    # Initialize an empty dictionary to store Fourier power data
+    fourier_data = {}
+    fourier_norm={}
+
+    for folder_name in os.listdir(top_dir):
+        # Construct the full path
+        folder_path = os.path.join(top_dir, folder_name)
+
+        # Check if it's a directory
+        if os.path.isdir(folder_path):
+            print(f"Processing folder: {folder_name}")
+            results_file = os.path.join(folder_path, "average_fourier.csv")           
+            if os.path.exists(results_file):
+                # Load the Fourier summary file
+                data = pd.read_csv(results_file)
+
+                # Extract relevant columns (EValue, CFreq/ModFreq, and Fourier Power)
+                for _, row in data.iterrows():
+                    E = row["EValue"]
+                    if var == "cfreq":
+                        CFreq = row["CFreq"]
+            
+                    average_power = row["power"]
+                    average_norm = row["norm"]
+                    # Initialize row if not present
+                    if E not in fourier_data:
+                        fourier_data[E] = {}
+                        fourier_norm[E] = {}
+                        
+                    # Add the Fourier power for this CFreq/ModFreq
+                    if var == "cfreq":
+                        fourier_data[E][CFreq] = average_power
+                        fourier_norm[E][CFreq] = average_norm
+            else:
+                print(f"Warning: Fourier summary file not found in {folder_path}")
+
+    # Convert the dictionary to a DataFrame
+    summary_df = pd.DataFrame(fourier_data).T
+    summary_df.index.name = "E"
+    summary_norm = pd.DataFrame(fourier_norm).T
+    summary_norm.index.name = "E"
+    summary_df.to_csv(power_file)
+    summary_norm.to_csv(norm_file)
+    print(f"Fourier power summary saved to {power_file}")
+    print(f"Fourier normalized power summary saved to {norm_file}")
+    return summary_df, summary_norm,top_dir
+
+
+
+
 def calculate_polarization_and_std(summary_dfp, summary_dfn,top_dir,filtered=False):
     # Calculate polarization length for positive and negative shifts
     polarization_length_p = summary_dfp.abs().div(summary_dfp.index, axis=0)  # Divide by E for positive shifts

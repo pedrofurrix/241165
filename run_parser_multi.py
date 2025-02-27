@@ -10,10 +10,13 @@ h.nrn_mainmenu(False)  # Disable NEURON's main menu and GUI
 from argparse import ArgumentParser
 
 parser = ArgumentParser(description="Run NEURON simulations with specified parameters.")
-parser.add_argument("-f", "--freq", type=float, nargs="*", required=True, help="Frequencies (Hz) for the simulations")
-parser.add_argument("-v", "--voltage", type=float, nargs="*", required=True, help="Voltages (mV) for the simulations")
-parser.add_argument("-d", "--depth", type=float, nargs="*", required=False,  default=1.0, help="Modulation depth (0-1)")
-parser.add_argument("-m", "--modfreq", type=float, nargs="*", required=False,  default=10, help="Modulation Frequency (Hz)")
+parser.add_argument("-f", "--freq", type=float, nargs="*", required=False,default=[2000], help="Frequencies (Hz) for the simulations")
+parser.add_argument("-v", "--voltage", type=float, nargs="*", required=False,default=[100], help="Voltages (mV) for the simulations")
+parser.add_argument("-d", "--depth", type=float, nargs="*", required=False,  default=[1.0], help="Modulation depth (0-1)")
+parser.add_argument("-m", "--modfreq", type=float, nargs="*", required=False,  default=[10], help="Modulation Frequency (Hz)")
+parser.add_argument("-t", "--theta", type=float, nargs="*", required=False,  default=[180], help="Polar Angle Theta (0-180) degrees")
+parser.add_argument("-p", "--phi", type=float, nargs="*", required=False,  default=[0], help="Azimuthal Angle Phi (0-360) degrees")
+parser.add_argument("-c", "--id", type=int, required=False,default=1, help="Frequency (Hz) for the simulation")
 parser.add_argument("-b","--batch", action="store_true", help="Enable batch processing mode")
 
 
@@ -24,15 +27,8 @@ script_dir = os.path.dirname(os.path.abspath(__file__))
 os.chdir(script_dir)
 import init_stim  
 var="cfreq"
-cell_id=1
-theta = 180
-phi = 0
 simtime = 1000
 dt = 0.001
-amp = 40
-depth = 1
-freq = 500
-modfreq = 100
 ton = 0
 dur = simtime
 run_id = 0
@@ -40,15 +36,18 @@ cb=True
 ramp=True
 ramp_duration=400
 tau=0
-data_dir="/media/sf_Data"
-
+data_dir=os.getcwd()
+ufield=True
+coordinates=[0,0,0]
+rho=0.276e-6
 
 def run_sim(params):
-    freq, amp, modfreq, depth = params
+    freq, amp, modfreq, depth,theta,phi,cell_id = params
     try:
         print(f"Running simulation for freq={freq}, amp={amp}, modfreq={modfreq}, depth={depth}")
         e_dir,t, is_xtra,vrec,soma_v,dend_v,axon_v,cell=init_stim.run_simulation(cell_id, theta, phi, simtime, dt, amp,
-                                                                                  depth, freq, modfreq, ton,dur,run_id,cb,var,ramp,ramp_duration,tau,data_dir)
+                                                                                  depth, freq, modfreq, ton,dur,run_id,cb,var,ramp,ramp_duration,tau,data_dir,
+                                                                                  ufield=ufield,coordinates=coordinates,rho=rho)
         print(f"Simulation completed for freq={freq}, amp={amp}")
         init_stim.save_plots(e_dir, t, is_xtra, vrec, soma_v, dend_v)
 
@@ -66,16 +65,19 @@ if __name__ == "__main__":
     # Get values
     freqs = args.freq
     amps = args.voltage
-    modfreq = args.modfreq
-    depth = args.depth
+    modfreqs = args.modfreq
+    depths = args.depth
+    thetas = args.theta
+    phis = args.phi
+    cell_id=args.id
 
     if args.batch:
         # Generate all combinations of (freq, amp)
-        param_combinations = list(product(freqs, amps,modfreq,depth))
+        param_combinations = list(product(freqs, amps,modfreqs,depths,thetas,phis))
 
-        # # Add modfreq and depth to each combination
-        # params = [(freq, amp, modfreq, depth) for freq, amp in param_combinations]
-        params=param_combinations
+        # # Add cell_id to each combination
+        params = [(freq, amp, modfreq, depth,theta,phi,cell_id) for freq, amp,modfreq,depth,theta,phi in param_combinations]
+        # params=param_combinations
 
          # Use multiprocessing
         maxnum_processes = cpu_count()  # Use all available cores
@@ -95,5 +97,8 @@ if __name__ == "__main__":
         # Extract single values for freq and amp
         freq = freqs[0]
         amp = amps[0]
-
-        run_sim((freq, amp, modfreq, depth))
+        modfreq = modfreqs[0]
+        depth = depths[0]
+        theta = thetas[0]
+        phi = phis[0]
+        run_sim((freq, amp, modfreq, depth,theta,phi,cell_id))

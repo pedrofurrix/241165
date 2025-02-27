@@ -10,13 +10,11 @@ E=100
 cell_id=1
 var="cfreq"
 # data_dir="/media/sf_Data"
+
 data_dir=os.getcwd()
-
-top_dir,bot_dir,param_dir=get_folder(CF,E,cell_id,var=var,data_dir=data_dir)
-
 from init_steady import run_threshold
-cell_id=1
 
+cell_id=1
 theta = 180 
 phi = 0 
 simtime = 30000
@@ -32,5 +30,12 @@ ramp=True
 ramp_duration=400
 tau=0
 threshold=1e-7
+nc=True
+record_all=False
+ufield=True
+coordinates=[0,0,0]
+rho=0.276e-6
+time_before=1000
 
-run_threshold(run_id,cell_id,theta,phi,simtime,dt,ton,amp,depth,dur,freq,modfreq,top_dir,var=var,ramp=ramp,ramp_duration=ramp_duration,tau=tau,data_dir=data_dir,threshold=threshold)
+run_threshold(run_id,cell_id,theta,phi,simtime,dt,ton,amp,depth,dur,freq,modfreq,var=var,ramp=ramp,ramp_duration=ramp_duration,tau=tau,
+              data_dir=data_dir,threshold=threshold,nc=nc,record_all=record_all,ufield=ufield,coordinates=coordinates,rho=rho,time_before=time_before)

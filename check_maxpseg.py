@@ -56,3 +56,4 @@ def check_segs(cell_id,var,data_dir=os.getcwd(),filtered=False):
         json.dump(max_segments, f, indent=4)
     
     print(f"Max segments saved to {output_file}")
+    
