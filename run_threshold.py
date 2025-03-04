@@ -50,8 +50,12 @@ def run_threshold(cell_id,freq,var,data_dir):
     tau=0
     thresh=20
     record_all=False
+    ufield=True
+    coordinates=[0,0,0]
+    rho=0.276e-6
     threshold(cell_id, theta, phi, simtime, dt, amp, depth, freq, modfreq,ton,dur,
-              thresh=thresh,cb=cb,var=var,ramp=ramp,ramp_duration=ramp_duration,tau=tau,data_dir=data_dir,record_all=record_all)
+              thresh=thresh,cb=cb,var=var,ramp=ramp,ramp_duration=ramp_duration,tau=tau,data_dir=data_dir,
+              record_all=record_all,ufield=ufield,coordinates=coordinates,rho=rho)
     sys.stdout=save_out
     end=time.time()
     print(f"The time of execution of above program is : {end-start} s")

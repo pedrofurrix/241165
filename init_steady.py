@@ -20,7 +20,7 @@ h.load_file("field.hoc")
 
 voltages=[]
 #Initializes the cell
-def initialize_cell(cell_id,theta,phi,ufield,coordinates,rho=100):
+def initialize_cell(cell_id,theta,phi,ufield,coordinates,rho=0.276e-6):
     
     h.setParamsAdultHuman()
     h.myelinate_ax=1
